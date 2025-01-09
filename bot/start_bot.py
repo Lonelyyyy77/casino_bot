@@ -16,9 +16,9 @@ logging.basicConfig(level=logging.INFO)
 TOKEN = os.getenv('TOKEN')
 router = Router()
 
+bot = Bot(token=TOKEN)
 
 async def main():
-    bot = Bot(token=TOKEN)
     dp = Dispatcher()
 
     await user_routers(dp)
