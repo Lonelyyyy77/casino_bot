@@ -21,11 +21,15 @@ async def game_selected(callback: CallbackQuery):
     kb = get_game_keyboard()
 
     if callback.data == 'bones_game':
-        result = random.randint(1, 6)
+        dice_message = await callback.message.answer_dice(emoji="🎲")
+        await asyncio.sleep(4)  # Ждем завершения анимации
+        result = dice_message.dice.value
         await game_message.edit_text(f"🎲 Вы выбросили: {result}\nПопробуйте ещё раз!", reply_markup=kb)
 
     elif callback.data == 'basketball_game':
-        result = random.randint(1, 6)
+        dice_message = await callback.message.answer_dice(emoji="🏀")
+        await asyncio.sleep(4)  # Ждем завершения анимации
+        result = dice_message.dice.value
         if result > 3:
             message_text = f"🏀 Отличный бросок! Вы набрали {result} очков! 🏆\nПопробуйте ещё раз!"
         else:
@@ -33,12 +37,16 @@ async def game_selected(callback: CallbackQuery):
         await game_message.edit_text(message_text, reply_markup=kb)
 
     elif callback.data == 'bowling_game':
-        result = random.randint(0, 10)
-        if result == 10:
+        dice_message = await callback.message.answer_dice(emoji="🎳")
+        await asyncio.sleep(4)  # Ждем завершения анимации
+        result = dice_message.dice.value
+        if result == 6:
             message_text = "🎳 🎉 Страйк! Вы выбили все кегли!\nПопробуйте ещё раз!"
         else:
             message_text = f"🎳 Вы выбили {result} кеглей. Неплохо!\nПопробуйте ещё раз!"
         await game_message.edit_text(message_text, reply_markup=kb)
+
+
 
 
 def get_game_keyboard():
