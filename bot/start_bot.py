@@ -1,26 +1,33 @@
 import asyncio
 import logging
+import os
 
 from aiogram import Bot, Dispatcher, Router
 
+from bot.database import initialize_database, DB_NAME
+from bot.database.admin.admin import add_admin
+from bot.handlers.routers.routers import user_routers, admin_routers
 from handlers.command_start import router as start_router
 
 import dotenv
-from dotenv import load_dotenv
 
 dotenv.load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-# TOKEN = load_dotenv('TOKEN') - MY DOTENV TOKEN
-# TOKEN='7772152147:AAHmceBDqzK8iaAw0eaq_gOAOFjlfklhhyY' - MY TOKEN
-TOKEN = '7528650704:AAERfIwdgypUreghZdPzfiDY0ZGuWg2KsXE' #VANIN TOKEN
+TOKEN = os.getenv('TOKEN')
 router = Router()
 
+bot = Bot(token=TOKEN)
 
 async def main():
-    bot = Bot(token=str(TOKEN))
     dp = Dispatcher()
+
+    initialize_database(DB_NAME)
+    add_admin(DB_NAME, 6588562022)
+
+    await user_routers(dp)
+    await admin_routers(dp)
 
     dp.include_router(start_router)
 
