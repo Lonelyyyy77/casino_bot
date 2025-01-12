@@ -1,21 +1,27 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
-	//"main.go/bot"
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/index.html")
 	})
 
-	//go bot.StartBot()
+	http.HandleFunc("/roulette", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/roulette.html")
+	})
 
-	log.Println("Starting server on :8080...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	http.HandleFunc("/slots", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/slots.html")
+	})
+
+	http.HandleFunc("/lottery", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/lottery.html")
+	})
+
+	fmt.Println("Server starting on port 8080...")
+	http.ListenAndServe(":8080", nil)
 }

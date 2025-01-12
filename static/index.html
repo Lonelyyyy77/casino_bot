@@ -1,32 +1,25 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Bot</title>
     <link rel="stylesheet" href="static/css/style.css">
-    <title>Казино Бот</title>
 </head>
 <body>
     <div class="container">
-        <h1>Ласкаво просимо до Казино</h1>
-        <div class="games">
-            <div class="game">
-                <h2>Рулетка</h2>
-                <p>Грайте в рулетку та вигравайте великі призи!</p>
+        <div class="header">
+            <div class="balance">100 JPC</div>
+            <div class="currencies">
+                <span>100 USDT</span>
+                <span>4100 руб</span>
             </div>
-            <div class="game">
-                <h2>Слоти</h2>
-                <p>Спробуйте свою удачу в слотах!</p>
-            </div>
-            <!-- Додайте більше ігор тут -->
         </div>
-        <div class="balance">
-            <h3>Ваш баланс: 1000 монет</h3>
-        </div>
-        <div class="profile">
-            <a href="#">Перейти до профілю</a>
+        <div class="menu">
+            <button onclick="window.location.href='/roulette'">РУЛЕТКА</button>
+            <button onclick="window.location.href='/slots'">СЛОТЫ</button>
+            <button onclick="window.location.href='/lottery'">ЛОТЕРЕЯ</button>
         </div>
     </div>
 </body>
 </html>
-
