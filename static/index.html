@@ -3,47 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino Main Page</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Users Table</title>
 </head>
 <body>
-    <div class="header">
-        <button class="header-btn">🎁</button> <!-- Free Spin -->
-        <button class="header-btn">👤</button> <!-- Account -->
-    </div>
-    
-
-    <div class="balance-card">
-        <div class="card-header">Your Balance</div>
-        <div class="main-balance" id="balance">100 JPC</div>
-        <div class="sub-balance" id="sub-balance">100 USDT | 4100 Stars</div>
-    </div>
-
-    <div class="middle">
-        <div class="middle-btn">
-            <div class="icon">💳</div>
-            <div class="label">Deposit</div>
-        </div>
-        <div class="middle-btn">
-            <div class="icon">🏦</div>
-            <div class="label">Withdraw</div>
-        </div>
-        <div class="middle-btn">
-            <div class="icon">🔄</div>
-            <div class="label">Exchange</div>
-        </div>
-        <div class="middle-btn">
-            <div class="icon">👥</div>
-            <div class="label">Referrals</div>
-        </div>
-    </div>
-
-    <div class="games">
-        <button class="game-btn">Roulette</button>
-        <button class="game-btn">Slots</button>
-        <button class="game-btn">Lottery</button>
-    </div>
-
-    <script src="js/script.js"></script>
+    <h1>Users in Database</h1>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Local IP</th>
+                <th>Username</th>
+                <th>Telegram ID</th>
+                <th>Language</th>
+                <th>Device</th>
+                <th>Balance</th>
+                <th>Agreed Rules</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Users}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.LocalIP}}</td>
+                <td>{{.Username}}</td>
+                <td>{{.TelegramID}}</td>
+                <td>{{.Language}}</td>
+                <td>{{.Device}}</td>
+                <td>{{.Balance}}</td>
+                <td>{{.HasAgreedRules}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
 </body>
 </html>
