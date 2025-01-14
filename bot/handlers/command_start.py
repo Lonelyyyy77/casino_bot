@@ -15,6 +15,8 @@ async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Не указано"
 
+    web_app_url = f"https://eadb-88-154-4-147.ngrok-free.app?telegram_id={telegram_id}"
+
     local_ip = "Неизвестно"
     device = "Неизвестно"
 
@@ -32,6 +34,7 @@ async def start_handler(message: types.Message):
     kbds = InlineKeyboardBuilder()
     kbds.row(InlineKeyboardButton(text='Игры', callback_data='games'))
     kbds.row(InlineKeyboardButton(text='Пополнить баланс', callback_data='replenish'))
+    kbds.row(InlineKeyboardButton(text='Открыть веб приложение', url=web_app_url))
 
     if is_admin(message.from_user.id):
         kbds.row(InlineKeyboardButton(text="Админ-панель", callback_data="admin_panel"))
