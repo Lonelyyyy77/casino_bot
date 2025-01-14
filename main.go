@@ -1,27 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/index.html")
-	})
+	// File server to serve static files
+	fs := http.FileServer(http.Dir("static"))
 
-	http.HandleFunc("/roulette", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/roulette.html")
-	})
+	// Route to serve index.html
+	http.Handle("/", fs)
 
-	http.HandleFunc("/slots", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/slots.html")
-	})
-
-	http.HandleFunc("/lottery", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/lottery.html")
-	})
-
-	fmt.Println("Server starting on port 8080...")
-	http.ListenAndServe(":8080", nil)
+	// Start the server
+	log.Println("Starting server on :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 }
