@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="" />
+    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/bot/handlers/admin/mailing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/get_reward.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/states/admin/states.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/database/admin/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/admin/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/command_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/command_start.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/routers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/routers/routers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/start_bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/start_bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main2.db" beforeDir="false" afterPath="$PROJECT_DIR$/main2.db" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,6 +38,31 @@
     &quot;assignee&quot;: &quot;Lonelyyyy77&quot;
   }
 }</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1736871272" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="invertasex" />
+                    <option name="lastUsedInstant" value="1736871271" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Lonelyyyy77/casino_bot.git&quot;,

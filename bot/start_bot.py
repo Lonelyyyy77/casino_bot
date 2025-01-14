@@ -23,7 +23,7 @@ bot = Bot(token=TOKEN)
 async def main():
     dp = Dispatcher()
 
-    initialize_database(DB_NAME)
+    initialize_database()
     add_admin(DB_NAME, 6588562022)
 
     await user_routers(dp)

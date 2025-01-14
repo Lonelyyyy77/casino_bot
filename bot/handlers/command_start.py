@@ -65,17 +65,4 @@ async def start_handler(message: types.Message):
 
 @router.callback_query(lambda c: c.data == 'accept')
 async def accept_handler(callback: types.CallbackQuery):
-    kbds = InlineKeyboardBuilder()
-    kbds.row(InlineKeyboardButton(text='Игры', callback_data='games'))
-    kbds.row(InlineKeyboardButton(text='Пополнить баланс', callback_data='replenish'))
-
-    if is_admin(callback.message.from_user.id):
-        kbds.row(InlineKeyboardButton(text="Админ-панель", callback_data="admin_panel"))
-
-    balance_jpc = get_user_balance(callback.message.from_user.id)
-    balance_usd = balance_jpc
-
-    await callback.message.answer(
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
-        reply_markup=kbds.as_markup()
-    )
+    await callback.message.answer("Нажми на команду:\n\n/start\n/start\n/start")
