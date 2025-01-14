@@ -15,7 +15,7 @@ async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Не указано"
 
-    web_app_url = f"https://eadb-88-154-4-147.ngrok-free.app?telegram_id={telegram_id}"
+    web_app_url = f"https://8fa6-88-154-11-236.ngrok-free.app?telegram_id={telegram_id}"
 
     local_ip = "Неизвестно"
     device = "Неизвестно"
