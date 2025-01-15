@@ -34,7 +34,7 @@ async def start_handler(message: types.Message):
     kbds = InlineKeyboardBuilder()
     kbds.row(InlineKeyboardButton(text='Игры', callback_data='games'))
     kbds.row(InlineKeyboardButton(text='Пополнить баланс', callback_data='replenish'))
-    kbds.row(InlineKeyboardButton(text='Открыть веб приложение', url=web_app_url))
+    kbds.row(InlineKeyboardButton(text='Открыть веб приложение', web_app=WebAppInfo(url=web_app_url)))
 
     if is_admin(message.from_user.id):
         kbds.row(InlineKeyboardButton(text="Админ-панель", callback_data="admin_panel"))
