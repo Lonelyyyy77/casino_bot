@@ -2,7 +2,7 @@ from aiogram import Router, types
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from database.admin.admin import is_admin
+from bot.database.admin.admin import is_admin
 
 router = Router()
 
