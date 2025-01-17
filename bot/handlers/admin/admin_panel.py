@@ -26,5 +26,7 @@ async def admin_panel(callback: types.CallbackQuery):
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text="Посмотреть всех пользователей", callback_data="view_users"))
     kb.row(InlineKeyboardButton(text="Сделать рассылку", callback_data="mailing"))
+    kb.row(InlineKeyboardButton(text="Настройка реферального процента", callback_data="adjust_referral_percent"))
+    kb.row(InlineKeyboardButton(text='⚙️ Установить процент', callback_data='set_global_percentage'))
 
     await callback.message.answer(stats_message, reply_markup=kb.as_markup())

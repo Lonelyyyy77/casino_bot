@@ -17,7 +17,7 @@ async def view_users(callback: types.CallbackQuery):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, local_ip, username, language_layout, device, telegram_id, balance FROM user;")
+    cursor.execute("SELECT id, local_ip, username, language_layout, device, telegram_id, balance, total_bets FROM user;")
     users = cursor.fetchall()
     conn.close()
 
@@ -26,7 +26,18 @@ async def view_users(callback: types.CallbackQuery):
         return
 
     user_list = "\n".join(
-        [f"{user[0]}:\n |- 👤 @{user[2]}\n |- DEVICE📱 - {user[4]}\n |- IP📡 - {user[1]}\n |- 🆔 (#id_{user[5]})\n |- 🌍 {user[3].upper()}\n |- 🏦 {user[6]}JPC | {user[6]}$\n" for user in users]
+        [
+            f"{user[0]}:\n"
+            f" |- 👤 @{user[2]}\n"
+            f" |- DEVICE📱 - {user[4]}\n"
+            f" |- IP📡 - {user[1]}\n"
+            f" |- 🆔 (#id_{user[5]})\n"
+            f" |- 🌍 {user[3].upper()}\n"
+            f" |- 🏦 {round(user[6], 3)} JPC | {round(user[6], 3)}$\n"
+            f" |- 💸 Потрачено на ставки: {round(user[7], 3)} JPC\n"
+            for user in users
+        ]
     )
 
     await callback.message.answer(f"Список пользователей:\n\n{user_list}")
+

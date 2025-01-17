@@ -3,25 +3,25 @@ import sqlite3
 from bot.database import DB_NAME
 
 
-def add_user_to_db(db_name, telegram_id, local_ip, username, language_layout, device):
+def add_user_to_db(db_name, telegram_id, local_ip, username, language_layout, device, referrer_id):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
 
     cursor.execute("SELECT id FROM user WHERE telegram_id = ?", (telegram_id,))
     user_exists = cursor.fetchone()
 
-    if not user_exists:
-        cursor.execute('''
-            INSERT INTO user (local_ip, username, telegram_id, language_layout, device)
-            VALUES (?, ?, ?, ?, ?);
-        ''', (local_ip, username, telegram_id, language_layout, device))
-
-        conn.commit()
-        conn.close()
-        return True
-    else:
+    if user_exists:
         conn.close()
         return False
+
+    cursor.execute('''
+        INSERT INTO user (telegram_id, local_ip, username, language_layout, device, referrer_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (telegram_id, local_ip, username, language_layout, device, referrer_id))
+    conn.commit()
+    conn.close()
+    return True
+
 
 
 def update_user_balance(telegram_id: int, jpc_amount: int, db_name: str = DB_NAME):
