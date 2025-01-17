@@ -3,9 +3,9 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
-from bot.database.user.user import add_user_to_db, get_user_balance
+from database import DB_NAME
+from database.admin.admin import is_admin
+from database.user.user import add_user_to_db, get_user_balance
 
 router = Router()
 
@@ -14,6 +14,8 @@ router = Router()
 async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Не указано"
+
+    web_app_url = f"https://fb42-2a02-2378-137d-1002-a913-1776-30ac-5f71.ngrok-free.app?telegram_id={telegram_id}"
 
     local_ip = "Неизвестно"
     device = "Неизвестно"
@@ -32,6 +34,7 @@ async def start_handler(message: types.Message):
     kbds = InlineKeyboardBuilder()
     kbds.row(InlineKeyboardButton(text='Игры', callback_data='games'))
     kbds.row(InlineKeyboardButton(text='Пополнить баланс', callback_data='replenish'))
+    kbds.row(InlineKeyboardButton(text='Открыть веб приложение', web_app={'url': web_app_url}))
 
     if is_admin(message.from_user.id):
         kbds.row(InlineKeyboardButton(text="Админ-панель", callback_data="admin_panel"))

@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = 'main2.db'
+DB_NAME = 'main3.db'
 
 
 def initialize_database(db_name):

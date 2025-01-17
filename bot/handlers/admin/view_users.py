@@ -2,8 +2,8 @@ import sqlite3
 
 from aiogram import types, Router
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
+from database import DB_NAME
+from database.admin.admin import is_admin
 
 router = Router()
 
