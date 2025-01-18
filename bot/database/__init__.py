@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = 'main_db.db'
+DB_NAME = 'main2.db'
 
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
@@ -29,7 +29,9 @@ def initialize_database():
             referral_earnings REAL DEFAULT 0.0,
             referral_percent REAL DEFAULT 10.0,
             total_bets REAL DEFAULT 0.0,
-            current_bet REAL DEFAULT 0.5
+            current_bet REAL DEFAULT 0.5,
+            is_frizzed_checkout INTEGER DEFAULT 0,
+            has_completed_captcha INTEGER DEFAULT 0
         );
     ''')
 
@@ -65,6 +67,15 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS game_settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             percentage INTEGER DEFAULT 10.0
+        );
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS captcha (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            telegram_id INTEGER UNIQUE NOT NULL,
+            expected_answer TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ''')
 

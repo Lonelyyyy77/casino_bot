@@ -7,12 +7,16 @@ async def user_routers(dp) -> Router():
     from ..user.get_reward import router as user_get_reward_router
     from ..user.transfer_balance import router as user_trade_balance_router
     from ..user.office import router as user_office_router
+    from ..user.referral_system import router as user_referral_system_router
+    from ..user.checkout_balance import router as user_checkout_balance_router
 
     dp.include_router(user_games_router)
     dp.include_router(user_replenish_router)
     dp.include_router(user_get_reward_router)
     dp.include_router(user_trade_balance_router)
     dp.include_router(user_office_router)
+    dp.include_router(user_referral_system_router)
+    dp.include_router(user_checkout_balance_router)
 
 
 async def admin_routers(dp) -> Router():
