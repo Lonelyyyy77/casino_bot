@@ -1,10 +1,4 @@
 import sqlite3
-<<<<<<< HEAD
-
-from aiogram import Router, types
-from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardButton
-=======
 import random
 from itertools import zip_longest
 from typing import Union
@@ -12,7 +6,6 @@ from typing import Union
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardButton, CallbackQuery
->>>>>>> lonely77
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
@@ -62,57 +55,14 @@ async def start_handler(message: types.Message):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-<<<<<<< HEAD
-
-    cursor.execute(
-        "SELECT referrer_id, referral_percent FROM user WHERE id = ?",
-        (telegram_id,)
-    )
-    referrer_data = cursor.fetchone()
-
-    referrer_id = None
-    if message.text and len(message.text.split()) > 1:
-        try:
-            referrer_id = int(message.text.split()[1])
-        except ValueError:
-            referrer_id = None
-
-    print(f"Referrer ID: {referrer_data}")
-
-    local_ip = "Неизвестно"
-    device = "Неизвестно"
-    language_layout = message.from_user.language_code
-
-    is_new_user = add_user_to_db(
-        db_name=DB_NAME,
-        telegram_id=telegram_id,
-        local_ip=local_ip,
-        username=username,
-        language_layout=language_layout,
-        device=device,
-        referrer_id=referrer_id,
-=======
 
     # Проверяем, зарегистрирован ли пользователь и его реферальные данные
     cursor.execute(
         "SELECT has_agreed_rules, has_completed_captcha FROM user WHERE telegram_id = ?",
         (telegram_id,)
->>>>>>> lonely77
     )
     user_data = cursor.fetchone()
 
-<<<<<<< HEAD
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT has_agreed_rules FROM user WHERE telegram_id = ?", (telegram_id,))
-    user_data = cursor.fetchone()
-
-    has_agreed_rules = user_data[0] if user_data else 0
-
-    conn.close()
-
-=======
     # Если пользователь отсутствует, добавляем его в базу
     if not user_data:
         referrer_id = None
@@ -145,7 +95,6 @@ async def start_handler(message: types.Message):
     conn.close()
 
     # Проверяем, согласился ли пользователь с правилами
->>>>>>> lonely77
     if not has_agreed_rules:
         kb = InlineKeyboardBuilder()
         kb.row(InlineKeyboardButton(text='✅Соглашаюсь✅', callback_data='accept'))
@@ -161,51 +110,6 @@ async def start_handler(message: types.Message):
         )
         return
 
-<<<<<<< HEAD
-        return
-
-    balance_jpc = get_user_balance(telegram_id)
-    balance_usd = balance_jpc
-
-    balance_jpc = round(balance_jpc, 3)
-    balance_usd = round(balance_usd, 3)
-
-    await message.answer(
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
-        reply_markup=keyboard
-    )
-
-    if is_new_user and referrer_id:
-        await notify_referrer(referrer_id, username)
-
-
-@router.callback_query(lambda c: c.data == 'accept')
-async def accept_rules(callback: types.CallbackQuery):
-    telegram_id = callback.from_user.id
-    balance_jpc = get_user_balance(telegram_id)
-    balance_usd = balance_jpc
-
-    keyboard = await start_keyboard(callback.message)
-
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("UPDATE user SET has_agreed_rules = 1 WHERE telegram_id = ?", (telegram_id,))
-        conn.commit()
-    except sqlite3.Error as e:
-        await callback.message.answer(f"Ошибка обновления базы данных: {e}")
-    finally:
-        conn.close()
-
-    await callback.message.delete()
-
-    await callback.message.answer(
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
-        reply_markup=keyboard
-    )
-
-=======
     if not has_completed_captcha:
         await start_captcha(message)
         return
@@ -342,4 +246,3 @@ async def home(source: Union[types.CallbackQuery, types.Message]):
             f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
             reply_markup=keyboard
         )
->>>>>>> lonely77
