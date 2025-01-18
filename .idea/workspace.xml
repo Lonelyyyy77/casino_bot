@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/bot/handlers/user/checkout_balance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/view_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/view_users.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/command_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/command_start.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/routers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/routers/routers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/user/office.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/office.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_db.db" beforeDir="false" afterPath="$PROJECT_DIR$/main_db.db" afterDir="false" />
-    </list>
+    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -45,7 +36,7 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="lonely77" />
-                    <option name="lastUsedInstant" value="1737147914" />
+                    <option name="lastUsedInstant" value="1737198530" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />

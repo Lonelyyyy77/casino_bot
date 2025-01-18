@@ -234,13 +234,15 @@ async def home(source: Union[types.CallbackQuery, types.Message]):
     balance_jpc = round(balance_jpc, 3)
     balance_usd = round(balance_usd, 3)
 
+    keyboard = await start_keyboard(source.message)
+
     if isinstance(source, types.CallbackQuery):
-        await source.message.answer(
+        await source.message.edit_text(
             f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
-            reply_markup=start_keyboard()
+            reply_markup=keyboard
         )
-    else:
+    elif isinstance(source, types.Message):
         await source.answer(
             f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
-            reply_markup=start_keyboard()
+            reply_markup=keyboard
         )
