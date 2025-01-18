@@ -9,6 +9,7 @@ async def user_routers(dp) -> Router():
     from ..user.office import router as user_office_router
     from ..user.referral_system import router as user_referral_system_router
     from ..user.checkout_balance import router as user_checkout_balance_router
+    from ..user.inline_send import router as user_inline_send_router
 
     dp.include_router(user_games_router)
     dp.include_router(user_replenish_router)
@@ -17,6 +18,7 @@ async def user_routers(dp) -> Router():
     dp.include_router(user_office_router)
     dp.include_router(user_referral_system_router)
     dp.include_router(user_checkout_balance_router)
+    dp.include_router(user_inline_send_router)
 
 
 async def admin_routers(dp) -> Router():

@@ -50,3 +50,61 @@ def get_user_balance(telegram_id: int, db_name: str = DB_NAME):
     conn.close()
 
     return result[0] if result else 0
+
+
+def get_user_by_telegram_id(telegram_id: int):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user WHERE telegram_id = ?", (telegram_id,))
+    row = cursor.fetchone()
+    if row is None:
+        return None
+
+    return {
+        'id': row[0],
+        'local_ip': row[1],
+        'username': row[2],
+        'telegram_id': row[3],
+        'language_layout': row[4],
+        'device': row[5],
+        'balance': row[6],
+        'has_agreed_rules': row[7],
+        'registration_date': row[8],
+        'referrer_id': row[9],
+        'referral_earnings': row[10],
+        'referral_percent': row[11],
+        'total_bets': row[12],
+        'current_bet': row[13],
+        'is_frizzed_checkout': row[14],
+        'has_completed_captcha': row[15]
+    }
+
+
+def get_user_by_username(username: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
+        return None
+
+    return {
+        'id': row[0],
+        'local_ip': row[1],
+        'username': row[2],
+        'telegram_id': row[3],
+        'language_layout': row[4],
+        'device': row[5],
+        'balance': row[6],
+        'has_agreed_rules': row[7],
+        'registration_date': row[8],
+        'referrer_id': row[9],
+        'referral_earnings': row[10],
+        'referral_percent': row[11],
+        'total_bets': row[12],
+        'current_bet': row[13],
+        'is_frizzed_checkout': row[14],
+        'has_completed_captcha': row[15]
+    }

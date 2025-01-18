@@ -34,7 +34,8 @@ async def notify_referrer(referrer_id: int, new_user: str):
 
 async def start_keyboard(message):
     telegram_id = message.from_user.id
-    web_app_url = f"https://8fa6-88-154-11-236.ngrok-free.app?telegram_id={telegram_id}"
+
+    web_app_url = f"https://3306-91-234-26-155.ngrok-free.app?telegram_id={telegram_id}"
 
     kbds = InlineKeyboardBuilder()
     kbds.row(InlineKeyboardButton(text='Открыть веб приложение', web_app={'url': web_app_url}))
@@ -56,14 +57,12 @@ async def start_handler(message: types.Message):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Проверяем, зарегистрирован ли пользователь и его реферальные данные
     cursor.execute(
         "SELECT has_agreed_rules, has_completed_captcha FROM user WHERE telegram_id = ?",
         (telegram_id,)
     )
     user_data = cursor.fetchone()
 
-    # Если пользователь отсутствует, добавляем его в базу
     if not user_data:
         referrer_id = None
         if message.text and len(message.text.split()) > 1:
@@ -94,7 +93,6 @@ async def start_handler(message: types.Message):
 
     conn.close()
 
-    # Проверяем, согласился ли пользователь с правилами
     if not has_agreed_rules:
         kb = InlineKeyboardBuilder()
         kb.row(InlineKeyboardButton(text='✅Соглашаюсь✅', callback_data='accept'))
@@ -180,19 +178,14 @@ async def captcha_handler(callback: types.CallbackQuery):
 
 
 async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
-    # Определяем Telegram ID отправителя
     telegram_id = source.from_user.id
 
-    # Список фруктов (только эмодзи)
     fruits = ["🍎", "🍌", "🍇", "🍍", "🍓", "🍒", "🥝", "🍑", "🍊", "🍋", "🍈", "🍉"]
 
-    # Случайный выбор фрукта
     selected_fruit = random.choice(fruits)
 
-    # Ожидаемый ответ (сам фрукт-эмодзи)
     expected_fruit = selected_fruit
 
-    # Сохранение ожидаемого ответа в базе данных
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -202,7 +195,6 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
     conn.commit()
     conn.close()
 
-    # Создание клавиатуры с фруктами (по 4 в ряду)
     kb = InlineKeyboardBuilder()
     for row in zip_longest(*[iter(fruits)] * 4, fillvalue=None):
         buttons = [
@@ -211,7 +203,6 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
         ]
         kb.row(*buttons)
 
-    # Отправляем сообщение
     if isinstance(source, types.CallbackQuery):
         await source.message.answer(
             f"Для подтверждения, выберите правильный фрукт: {selected_fruit}",
