@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.states.admin.states import MailingState
+from states.admin.states import MailingState
 from ...database import DB_NAME
 
 router = Router()

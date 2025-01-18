@@ -4,8 +4,8 @@ from aiogram import types, Router
 from aiogram.types import InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
+from database import DB_NAME
+from database.admin.admin import is_admin
 from math import ceil
 
 router = Router()

@@ -8,10 +8,10 @@ from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
-from bot.database.user.user import add_user_to_db, get_user_balance
-from bot.start_bot import bot
+from database import DB_NAME
+from database.admin.admin import is_admin
+from database.user.user import add_user_to_db, get_user_balance
+from start_bot import bot
 
 router = Router()
 
@@ -34,7 +34,7 @@ async def notify_referrer(referrer_id: int, new_user: str):
 
 async def start_keyboard(message):
     telegram_id = message.from_user.id
-    web_app_url = f"https://8fa6-88-154-11-236.ngrok-free.app?telegram_id={telegram_id}"
+    web_app_url = f"https://b371-37-73-38-180.ngrok-free.app"
 
     kbds = InlineKeyboardBuilder()
     kbds.row(InlineKeyboardButton(text='Открыть веб приложение', web_app={'url': web_app_url}))

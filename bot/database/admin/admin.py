@@ -1,6 +1,6 @@
 import sqlite3
 
-from bot.database import DB_NAME
+from database import DB_NAME
 
 
 def add_admin(db_name, telegram_id):

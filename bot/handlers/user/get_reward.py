@@ -4,8 +4,8 @@ from aiogram import Router, types
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.user.user import update_user_balance
+from database import DB_NAME
+from database.user.user import update_user_balance
 
 router = Router()
 
