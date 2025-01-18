@@ -1,8 +1,18 @@
 import sqlite3
+<<<<<<< HEAD
 
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardButton
+=======
+import random
+from itertools import zip_longest
+from typing import Union
+
+from aiogram import Router, types
+from aiogram.filters import CommandStart
+from aiogram.types import InlineKeyboardButton, CallbackQuery
+>>>>>>> lonely77
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
@@ -52,6 +62,7 @@ async def start_handler(message: types.Message):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+<<<<<<< HEAD
 
     cursor.execute(
         "SELECT referrer_id, referral_percent FROM user WHERE id = ?",
@@ -80,8 +91,17 @@ async def start_handler(message: types.Message):
         language_layout=language_layout,
         device=device,
         referrer_id=referrer_id,
-    )
+=======
 
+    # Проверяем, зарегистрирован ли пользователь и его реферальные данные
+    cursor.execute(
+        "SELECT has_agreed_rules, has_completed_captcha FROM user WHERE telegram_id = ?",
+        (telegram_id,)
+>>>>>>> lonely77
+    )
+    user_data = cursor.fetchone()
+
+<<<<<<< HEAD
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -92,6 +112,40 @@ async def start_handler(message: types.Message):
 
     conn.close()
 
+=======
+    # Если пользователь отсутствует, добавляем его в базу
+    if not user_data:
+        referrer_id = None
+        if message.text and len(message.text.split()) > 1:
+            try:
+                referrer_id = int(message.text.split()[1])
+            except ValueError:
+                referrer_id = None
+
+        local_ip = "Неизвестно"
+        device = "Неизвестно"
+        language_layout = message.from_user.language_code
+
+        is_new_user = add_user_to_db(
+            db_name=DB_NAME,
+            telegram_id=telegram_id,
+            local_ip=local_ip,
+            username=username,
+            language_layout=language_layout,
+            device=device,
+            referrer_id=referrer_id,
+        )
+
+        has_agreed_rules = 0
+        has_completed_captcha = 0
+    else:
+        has_agreed_rules, has_completed_captcha = user_data
+        is_new_user = False
+
+    conn.close()
+
+    # Проверяем, согласился ли пользователь с правилами
+>>>>>>> lonely77
     if not has_agreed_rules:
         kb = InlineKeyboardBuilder()
         kb.row(InlineKeyboardButton(text='✅Соглашаюсь✅', callback_data='accept'))
@@ -105,7 +159,9 @@ async def start_handler(message: types.Message):
             reply_markup=kb.as_markup(),
             parse_mode="HTML"
         )
+        return
 
+<<<<<<< HEAD
         return
 
     balance_jpc = get_user_balance(telegram_id)
@@ -149,3 +205,141 @@ async def accept_rules(callback: types.CallbackQuery):
         reply_markup=keyboard
     )
 
+=======
+    if not has_completed_captcha:
+        await start_captcha(message)
+        return
+
+    balance_jpc = get_user_balance(telegram_id)
+    balance_usd = balance_jpc
+
+    balance_jpc = round(balance_jpc, 3)
+    balance_usd = round(balance_usd, 3)
+
+    await message.answer(
+        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+        reply_markup=keyboard
+    )
+
+    if is_new_user and referrer_id:
+        await notify_referrer(referrer_id, username)
+
+
+@router.callback_query(lambda c: c.data == "accept")
+async def accept_rules(callback: types.CallbackQuery):
+    telegram_id = callback.from_user.id
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE user SET has_agreed_rules = 1 WHERE telegram_id = ?", (telegram_id,))
+    conn.commit()
+    conn.close()
+
+    await callback.message.delete()
+    await start_captcha(callback)
+
+
+@router.callback_query(lambda c: c.data.startswith("captcha:"))
+async def captcha_handler(callback: types.CallbackQuery):
+    telegram_id = callback.from_user.id
+    selected_fruit = callback.data.split(":")[1]
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT expected_answer FROM captcha WHERE telegram_id = ?", (telegram_id,))
+    result = cursor.fetchone()
+
+    if not result:
+        await callback.answer("Ошибка капчи. Попробуйте снова.", show_alert=True)
+        conn.close()
+        return
+
+    expected_fruit = result[0]
+
+    if selected_fruit == expected_fruit:
+        cursor.execute("DELETE FROM captcha WHERE telegram_id = ?", (telegram_id,))
+        cursor.execute("UPDATE user SET has_completed_captcha = 1 WHERE telegram_id = ?", (telegram_id,))
+        conn.commit()
+        conn.close()
+
+        await callback.message.delete()
+
+        keyboard = await start_keyboard(callback.message)  # Создайте функцию start_keyboard, если её нет
+        await callback.message.answer(
+            "Капча успешно пройдена! Добро пожаловать!",
+            reply_markup=keyboard
+        )
+    else:
+        conn.close()
+        await callback.answer("Неправильный выбор. Попробуйте ещё раз.", show_alert=True)
+
+
+async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
+    # Определяем Telegram ID отправителя
+    telegram_id = source.from_user.id
+
+    # Список фруктов (только эмодзи)
+    fruits = ["🍎", "🍌", "🍇", "🍍", "🍓", "🍒", "🥝", "🍑", "🍊", "🍋", "🍈", "🍉"]
+
+    # Случайный выбор фрукта
+    selected_fruit = random.choice(fruits)
+
+    # Ожидаемый ответ (сам фрукт-эмодзи)
+    expected_fruit = selected_fruit
+
+    # Сохранение ожидаемого ответа в базе данных
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR REPLACE INTO captcha (telegram_id, expected_answer) VALUES (?, ?)",
+        (telegram_id, expected_fruit)
+    )
+    conn.commit()
+    conn.close()
+
+    # Создание клавиатуры с фруктами (по 4 в ряду)
+    kb = InlineKeyboardBuilder()
+    for row in zip_longest(*[iter(fruits)] * 4, fillvalue=None):
+        buttons = [
+            InlineKeyboardButton(text=fruit, callback_data=f"captcha:{fruit}")
+            for fruit in row if fruit
+        ]
+        kb.row(*buttons)
+
+    # Отправляем сообщение
+    if isinstance(source, types.CallbackQuery):
+        await source.message.answer(
+            f"Для подтверждения, выберите правильный фрукт: {selected_fruit}",
+            reply_markup=kb.as_markup()
+        )
+    elif isinstance(source, types.Message):
+        await source.answer(
+            f"Для подтверждения, выберите правильный фрукт: {selected_fruit}",
+            reply_markup=kb.as_markup()
+        )
+
+
+@router.callback_query(lambda c: c.data == 'home')
+async def home(source: Union[types.CallbackQuery, types.Message]):
+    telegram_id = source.from_user.id
+
+    balance_jpc = get_user_balance(telegram_id)
+    balance_usd = balance_jpc
+
+    balance_jpc = round(balance_jpc, 3)
+    balance_usd = round(balance_usd, 3)
+
+    keyboard = await start_keyboard(source.message)
+
+    if isinstance(source, types.CallbackQuery):
+        await source.message.edit_text(
+            f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+            reply_markup=keyboard
+        )
+    elif isinstance(source, types.Message):
+        await source.answer(
+            f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+            reply_markup=keyboard
+        )
+>>>>>>> lonely77

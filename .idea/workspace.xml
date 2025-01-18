@@ -4,19 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/bot/handlers/admin/mailing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bot/handlers/user/get_reward.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bot/states/admin/states.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/database/admin/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/admin/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/command_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/command_start.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/routers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/routers/routers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/start_bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/start_bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main2.db" beforeDir="false" afterPath="$PROJECT_DIR$/main2.db" afterDir="false" />
-    </list>
+    <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,6 +34,10 @@
             <RecentBranchesForRepo>
               <option name="branches">
                 <list>
+                  <RecentBranch>
+                    <option name="branchName" value="lonely77" />
+                    <option name="lastUsedInstant" value="1737198530" />
+                  </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
                     <option name="lastUsedInstant" value="1736871272" />
@@ -81,7 +73,7 @@
   &quot;keyToString&quot;: {
     &quot;Python.start_bot.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;lonely77&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/G5/PycharmProjects/casino_bot/bot/start_bot.py&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
