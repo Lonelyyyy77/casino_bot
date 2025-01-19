@@ -1,129 +1,54 @@
 body {
-    font-family: Arial, sans-serif;
+    background-color: #1e1e2f;
+    color: #ffffff;
+    font-family: "Arial", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
     margin: 0;
-    padding: 0;
-    background-color: #0A0A0A; /* Темный фон */
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* Центрирование кнопок вертикально */
-    width: 100%;
-    padding: 10px 20px; /* Отступы от краев */
-    background-color: #121212; /* Темный оттенок для хедера */
+h1 {
+    font-size: 2.5rem;
+    color: #f39c12;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-.header-btn {
-    background: none; /* Убираем фон */
-    border: none;
-    color: white;
-    font-size: 24px; /* Размер смайлика */
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-}
-
-.header-btn:hover {
-    transform: scale(1.2); /* Эффект увеличения при наведении */
-}
-
-.balance-card {
-    width: 320px;
-    height: 180px;
-    background: linear-gradient(145deg, #1F1F1F, #2A2A2A); /* Темный градиент */
-    border-radius: 15px;
-    box-shadow: 0px 0px 15px 3px rgba(0, 116, 217, 0.5); /* Синее свечение */
-    margin: 20px;
+.container {
+    text-align: center;
     padding: 20px;
-    text-align: center;
-    color: #FFFFFF;
-    font-size: 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    border-radius: 10px;
+    background: #252537;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.card-header {
-    font-size: 18px;
+.balance {
+    font-size: 1.5rem;
+    margin: 15px 0;
+    color: #ecf0f1;
+}
+
+.balance span {
+    color: #f1c40f;
     font-weight: bold;
 }
 
-.main-balance {
-    font-size: 36px;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.sub-balance {
-    font-size: 14px;
-    color: #6A6A6A; /* Темно-серый текст */
-}
-
-.middle {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-}
-
-.middle-btn {
-    background-color: #1A1A1A; /* Темный фон кнопок */
+button {
+    background-color: #f39c12;
+    color: #1e1e2f;
+    font-size: 1rem;
+    padding: 10px 20px;
     border: none;
-    width: 70px; /* Уменьшены размеры */
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s ease-in-out, background-color 0.3s;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
 }
 
-.middle-btn:hover {
-    transform: scale(1.1);
-    background-color: #2A2A2A; /* Темный оттенок при наведении */
-}
-
-.middle-btn .icon {
-    font-size: 22px;
-    margin-bottom: 5px;
-}
-
-.middle-btn .label {
-    font-size: 12px;
-    color: #6A6A6A;
-    text-align: center;
-}
-
-.games {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    align-items: center;
-}
-
-.game-btn {
-    background-color: #1A1A1A; /* Темные кнопки игр */
-    border: none;
-    color: white;
-    padding: 15px 20px;
-    font-size: 18px;
-    border-radius: 25px;
-    cursor: pointer;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-
-.game-btn:hover {
-    background-color: #2A2A2A; /* Темный эффект наведения */
+button:hover {
+    background-color: #d35400;
 }

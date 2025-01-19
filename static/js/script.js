@@ -1,14 +1,38 @@
-// Initialize balance variables
-let balance = "0 JPC";
-let subBalance = "0 USDT | 0 Stars";
+const telegramID = document.getElementById("telegram-id").textContent;
 
-// Function to update balance dynamically
-function updateBalance(newBalance, newSubBalance) {
-    document.getElementById("balance").textContent = newBalance;
-    document.getElementById("sub-balance").textContent = newSubBalance;
+// Функция обновления баланса
+function updateBalance() {
+    fetch('/update_balance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            telegram_id: telegramID,
+            amount: 10.0,
+        }),
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Balance updated!');
+                location.reload(); // Перезагружаем страницу
+            } else {
+                alert('Failed to update balance');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating balance:', error);
+        });
 }
 
-// Example of dynamic update (replace this with API integration later)
-setTimeout(() => {
-    updateBalance("150 JPC", "150 USDT | 6100 Stars");
-}, 3000);
+// Добавляем обработчики для кнопок
+document.getElementById('update-balance-btn').addEventListener('click', updateBalance);
+document.getElementById('casino-btn').addEventListener('click', () => {
+    alert("Go to Casino Page");
+});
+document.getElementById('account-btn').addEventListener('click', () => {
+    alert("Go to Account Page");
+});
+document.getElementById('freespin-btn').addEventListener('click', () => {
+    alert("Go to Free Spin");
+});

@@ -29,3 +29,29 @@ def is_admin(telegram_id):
 
     conn.close()
     return bool(admin_exists)
+
+
+def get_user_statistics():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM user WHERE registration_date >= datetime('now', '-1 day')")
+    users_last_day = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM user WHERE registration_date >= datetime('now', '-7 days')")
+    users_last_week = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM user WHERE registration_date >= datetime('now', '-1 month')")
+    users_last_month = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM user")
+    total_users = cursor.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "last_day": users_last_day,
+        "last_week": users_last_week,
+        "last_month": users_last_month,
+        "total": total_users
+    }
