@@ -4,9 +4,9 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
-from bot.states.admin.states import SetPercentageStates
+from database import DB_NAME
+from database.admin.admin import is_admin
+from states.admin.states import SetPercentageStates
 
 router = Router()
 

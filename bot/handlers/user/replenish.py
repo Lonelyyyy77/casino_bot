@@ -4,9 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import LabeledPrice, InlineKeyboardButton, PreCheckoutQuery, CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.user.user import update_user_balance
-from bot.states.user.user import PaymentState
+from database import DB_NAME
+from database.user.user import update_user_balance
+from states.user.user import PaymentState
 
 CURRENCY_USD = 'USD'
 CURRENCY = 'XTR'

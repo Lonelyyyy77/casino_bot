@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.types import CallbackQuery
 import sqlite3
 
-from bot.database import DB_NAME
+from database import DB_NAME
 
 router = Router()
 

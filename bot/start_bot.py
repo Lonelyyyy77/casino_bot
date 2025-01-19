@@ -4,9 +4,9 @@ import os
 
 from aiogram import Bot, Dispatcher, Router
 
-from bot.database import initialize_database, DB_NAME
-from bot.database.admin.admin import add_admin
-from bot.handlers.routers.routers import user_routers, admin_routers, start_router
+from database import initialize_database, DB_NAME
+from database.admin.admin import add_admin
+from handlers.routers.routers import user_routers, admin_routers, start_router
 
 import dotenv
 

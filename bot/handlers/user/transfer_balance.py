@@ -5,8 +5,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.states.user.user import TransferState
+from database import DB_NAME
+from states.user.user import TransferState
 
 router = Router()
 

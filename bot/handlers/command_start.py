@@ -8,10 +8,10 @@ from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.database import DB_NAME
-from bot.database.admin.admin import is_admin
-from bot.database.user.user import add_user_to_db, get_user_balance
-from bot.start_bot import bot
+from database import DB_NAME
+from database.admin.admin import is_admin
+from database.user.user import add_user_to_db, get_user_balance
+from start_bot import bot
 
 router = Router()
 

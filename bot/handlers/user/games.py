@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from pyexpat.errors import messages
 
-from bot.database import DB_NAME
+from database import DB_NAME
 
 router = Router()
 

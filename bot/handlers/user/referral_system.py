@@ -1,7 +1,7 @@
 from aiogram import Router, types
 import sqlite3
 
-from bot.database import DB_NAME
+from database import DB_NAME
 
 router = Router()
 

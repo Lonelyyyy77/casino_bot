@@ -3,12 +3,12 @@ from aiogram import Router, types, Bot
 from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
-from bot.database.user.user import (
+from database.user.user import (
     get_user_balance,
     update_user_balance,
     get_user_by_username
 )
-from bot.start_bot import bot  # ваш Bot объект
+from start_bot import bot  # ваш Bot объект
 
 router = Router()
 

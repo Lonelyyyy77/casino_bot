@@ -5,19 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casino Dashboard</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/account.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Casino Dashboard</h1>
-        <div class="balance">
-            Telegram ID: <span id="telegram-id">{{.TelegramID}}</span><br>
-            Balance: <span id="balance">{{.Balance}}</span>
-        </div>
-        <button id="update-balance-btn">Add 10 to Balance</button>
-        <button id="casino-btn">Go to Casino</button>
-        <button id="account-btn">Account</button>
-        <button id="freespin-btn">Free Spin</button>
+    <!-- Верхняя панель -->
+    <div class="top-bar">
+        <button class="top-button free-spin-btn" id="freespin-btn">🎁</button>
+        <button class="top-button account-btn" id="account-btn">👤</button>
     </div>
+
+    <!-- Карточка баланса -->
+    <div class="balance-card">
+        <div class="main-balance">
+            <h2>{{.Balance}} JPC</h2>
+        </div>
+        <hr class="balance-divider"> <!-- Разделительная линия -->
+        <div class="other-balances">
+            <div class="usdt">{{.Balance}} USDT</div>
+            <div class="stars">{{printf "%.0f" (calcStars .Balance)}} STARS</div>
+        </div>
+    </div>
+
+    <!-- Разделительная линия -->
+    <hr class="divider">
+
+    <!-- Управление счетом -->
+    <div class="account-actions">
+        <button class="account-btn" title="Deposit">💰</button>
+        <button class="account-btn" title="Withdraw">📤</button>
+        <button class="account-btn" title="Exchange">🔄</button>
+        <button class="account-btn" title="Referrals">👥</button>
+    </div>
+
+    <!-- Разделительная линия -->
+    <hr class="divider">
+
+    <!-- Кнопки действий -->
+    <div class="actions">
+        <button class="action-btn" id="casino-btn">ROULETTE</button>
+        <button class="action-btn">SLOTS</button>
+        <button class="action-btn">LOTTERY</button>
+    </div>
+
+    <!-- Telegram ID -->
+    <div class="telegram-id">
+        Telegram ID: <span id="telegram-id">{{.TelegramID}}</span>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="account-modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2>Account Information</h2>
+            <p>Your Telegram ID:</p>
+            <p class="highlight-id">{{.TelegramID}}</p>
+        </div>
+    </div>
+
     <script src="/static/js/script.js"></script>
+    <script src="/static/js/account.js"></script>
 </body>
 </html>
