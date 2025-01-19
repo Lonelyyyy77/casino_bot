@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casino Dashboard</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/account.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <!-- Верхняя панель -->
@@ -19,7 +19,7 @@
         <div class="main-balance">
             <h2>{{.Balance}} JPC</h2>
         </div>
-        <hr class="balance-divider"> <!-- Разделительная линия -->
+        <hr class="balance-divider">
         <div class="other-balances">
             <div class="usdt">{{.Balance}} USDT</div>
             <div class="stars">{{printf "%.0f" (calcStars .Balance)}} STARS</div>
@@ -47,16 +47,11 @@
         <button class="action-btn">LOTTERY</button>
     </div>
 
-    <!-- Telegram ID -->
-    <div class="telegram-id">
-        Telegram ID: <span id="telegram-id">{{.TelegramID}}</span>
-    </div>
-
     <!-- Модальное окно -->
-    <div class="modal" id="account-modal">
+    <div class="modal hide" id="account-modal">
         <div class="modal-content">
             <span class="close" id="close-modal">&times;</span>
-            <h2>Account Information</h2>
+            <h2>Account</h2>
             <p>Your Telegram ID:</p>
             <p class="highlight-id">{{.TelegramID}}</p>
         </div>

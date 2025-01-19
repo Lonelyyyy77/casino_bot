@@ -1,10 +1,10 @@
-/* Общий стиль страницы */
+/* Общий стиль страницы *//* Основной фон */
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #001F3F, #001B36); /* Тёмно-синий градиент */
-    color: white;
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--tg-theme-bg-color, linear-gradient(to bottom, #0f172a, #1e293b)); /* Telegram Theme Adaptation */
+    color: var(--tg-theme-text-color, white);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -24,9 +24,9 @@ body {
 }
 
 .top-button {
-    background: #0044cc;
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Синие градиенты */
     border: none;
-    color: white;
+    color: var(--tg-theme-text-color, white);
     font-size: 24px;
     width: 50px;
     height: 50px;
@@ -35,58 +35,87 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.top-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
 }
 
 /* Карточка баланса */
 .balance-card {
-    background: #1E1E2E; /* Темно-серый фон */
-    border-radius: 15px;
+    background: linear-gradient(145deg, #111827, #1f2937); /* Темно-серый фон с оттенком синего */
+    border-radius: 20px;
     padding: 20px;
     text-align: center;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
     margin-top: 100px;
-    width: 90%;
-    height: 240px; /* Увеличенная высота карточки */
+    width: 87%;
+    height: 30%;
     position: relative; /* Для размещения элементов */
-    border: 2px solid rgba(255, 255, 255, 0.2); /* Лёгкий контур */
+    border: 2px solid rgba(255, 255, 255, 0.15); /* Лёгкий контур */
+
+    min-width: 80%; /* Минимальная ширина */
+    max-width: 90%; /* Максимальная ширина */
+    min-height: 20%; /* Минимальная высота */
+    max-height: 40%; /* Максимальная высота */
+
+}
+
+/* Контейнер для основного баланса */
+.main-balance {
+    display: flex;
+    justify-content: center; /* Горизонтальное выравнивание */
+    align-items: center; /* Вертикальное выравнивание */
+    height: 75%; /* Занять всю высоту карточки */
 }
 
 /* Основной баланс */
 .main-balance h2 {
-    font-size: 64px; /* Увеличенный шрифт для JPC */
+    font-size: 60px;
     font-weight: bold;
-    margin: 0;
-    color: white; /* Белый текст для JPC */
-    line-height: 100px; /* Центрирование текста */
+    
+    margin: 0; /* Убираем отступы */
+    line-height: 1; /* Сохраняем компактность текста */
+    color: white; /* Белый текст */
 }
 
 /* Разделительная линия внутри карточки */
 .balance-divider {
     border: none;
-    border-top: 1px solid #B0BEC5; /* Светло-серая линия */
-    margin: 20px 0; /* Отступы сверху и снизу */
+    border-top: 1px solid #64748b; /* Светло-серая линия */
+    margin: 12px 0;
+    position: relative;
+    top: -18px;
 }
 
 /* Валюты внутри карточки */
 .other-balances {
     display: flex;
-    justify-content: space-between;
-    padding: 0 20px; /* Отступы от краёв карточки */
-    font-size: 18px; /* Увеличенный шрифт для валют */
-    color: #B0BEC5; /* Светло-серый цвет текста */
+    justify-content: space-between; /* Равномерное распределение */
+    padding: 0 20px; /* Отступы внутри контейнера */
+    font-size: 20px; /* Размер текста */
+    color: #94a3b8; /* Светло-серый цвет текста */
+    gap: 40px; /* Расстояние между валютами */
 }
 
-.other-balances .usdt,
+/* Индивидуальные отступы для каждой валюты */
+.other-balances .usdt {
+    margin-right: 20px; /* Отступ справа */
+    text-align: left; /* Выравнивание текста по левому краю */
+}
+
 .other-balances .stars {
-    flex: 1; /* Равномерное распределение по ширине */
-    text-align: center; /* Центрирование текста */
+    margin-left: 20px; /* Отступ слева */
+    text-align: right; /* Выравнивание текста по правому краю */
 }
 
 /* Разделительные линии */
 .divider {
     border: none;
-    border-top: 1px solid #555; /* Светло-серый разделитель */
+    border-top: 1px solid #475569;
     width: 90%;
     margin: 20px 0;
 }
@@ -100,54 +129,76 @@ body {
 }
 
 .account-btn {
-    background: #0044cc;
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Градиенты кнопок */
     border: none;
     color: white;
-    font-size: 24px; /* Размер для смайликов */
-    width: 60px; /* Круглая форма */
+    font-size: 24px;
+    width: 60px;
     height: 60px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .account-btn:hover {
-    background: #0055ff;
+    transform: scale(1.1);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
 }
 
 /* Кнопки действий */
 .actions {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Пространство между кнопками */
+    gap: 20px;
     width: 90%;
 }
 
 .action-btn {
-    background: #0044cc;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     border: none;
     color: white;
-    font-size: 20px; /* Увеличенный текст */
+    font-size: 20px;
     padding: 15px;
     border-radius: 25px;
     cursor: pointer;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .action-btn:hover {
-    background: #0055ff;
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
 }
 
-/* Telegram ID */
-.telegram-id {
-    margin-top: 20px;
-    font-size: 14px; /* Увеличенный текст */
-    color: #B0BEC5; /* Светло-серый */
-    text-align: center;
+
+
+/* Анимация появления */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9); /* Уменьшение окна */
+    }
+    to {
+        opacity: 1;
+        transform: scale(1); /* Нормальный размер */
+    }
+}
+
+/* Анимация исчезновения */
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1); /* Нормальный размер */
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9); /* Уменьшение окна */
+    }
 }
 
 /* Модальное окно */
@@ -165,28 +216,74 @@ body {
 
 /* Контент модального окна */
 .modal-content {
-    background-color: #1E1E2E;
+    background-color: rgba(18, 18, 18, 0.8); /* Прозрачный чёрный */
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
     width: 80%;
-    border-radius: 10px;
+    height: 70%;
+    border-radius: 25px;
     text-align: center;
     color: white;
+    opacity: 0; /* Начальное состояние (скрытое) */
+    transform: scale(0.9); /* Уменьшение окна */
+    animation: modalFadeIn 0.3s forwards; /* Анимация появления */
+    backdrop-filter: blur(15px); /* Размытие фона */
+    -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Лёгкий контур */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5); /* Тень для объёма */
+}
+
+
+/* Появление */
+.modal.show .modal-content {
+    animation: modalFadeIn 0.3s forwards;
+}
+
+/* Исчезновение */
+.modal.hide .modal-content {
+    animation: modalFadeOut 0.3s forwards;
+}
+
+
+.modal-content h2 {
+    padding-bottom: 45%;
+    font-weight: bold;
+    width: 0%;
+    font-size: 25px;
+    margin: 0 0 15px;
+    color: #7aadff;
+}
+
+.modal-content p {
+
+    margin: 10px 0;
+    font-size: 17px;
+    height: 5%;
+}
+
+.highlight-id {
+    font-size: 18px;
+    font-weight: bold;
+    color: #dce9ff; /* Голубой акцент */
+    margin-top: 5px;
 }
 
 /* Кнопка закрытия модального окна */
 .close {
-    color: #aaa;
+    color: var(--tg-theme-text-color, #7aadff);
+    transition: 500ms;
     float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+
 }
 
 .close:hover,
 .close:focus {
-    color: #fff;
+
+    color: #0062ff;
+    transition: 500ms;
     text-decoration: none;
 }
 

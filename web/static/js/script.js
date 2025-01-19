@@ -37,3 +37,12 @@ document.getElementById('account-btn').addEventListener('click', () => {
 document.getElementById('freespin-btn').addEventListener('click', () => {
     alert("Go to Free Spin");
 });
+
+// Адаптация темы Telegram
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.Telegram.WebApp.themeParams) {
+        const theme = window.Telegram.WebApp.themeParams;
+        document.body.style.background = theme.bg_color || "#0f172a";
+        document.body.style.color = theme.text_color || "white";
+    }
+});
