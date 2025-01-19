@@ -173,7 +173,7 @@ async def handle_jpc_choice(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(
         f"Вы выбрали пополнение на {jpc_amount} JPC ({jpc_amount}$). Это эквивалентно {stars_needed:.2f} звёзд. Подтвердите, пожалуйста.",
         reply_markup=InlineKeyboardBuilder().add(
-            InlineKeyboardButton(text="Подтвердить", callback_data="123")).as_markup()
+            InlineKeyboardButton(text="Подтвердить", callback_data="confirm_payment")).as_markup()
     )
 
 

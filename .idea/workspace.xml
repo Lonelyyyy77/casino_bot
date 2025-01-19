@@ -8,12 +8,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.db" beforeDir="false" afterPath="$PROJECT_DIR$/bot.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot/handlers/command_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/command_start.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/user/inline_send.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/inline_send.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/user/replenish.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/replenish.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main2.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/telegram.js" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,7 +42,7 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="lonely77" />
-                    <option name="lastUsedInstant" value="1737200030" />
+                    <option name="lastUsedInstant" value="1737285808" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
