@@ -12,16 +12,17 @@ function updateBalance() {
             amount: 10.0,
         }),
     })
-        .then(response => {
-            if (response.ok) {
-                alert('Balance updated!');
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Balance updated successfully:", data);
                 location.reload(); // Перезагружаем страницу
             } else {
-                alert('Failed to update balance');
+                alert("Failed to update balance");
             }
         })
         .catch(error => {
-            console.error('Error updating balance:', error);
+            console.error("Error updating balance:", error);
         });
 }
 

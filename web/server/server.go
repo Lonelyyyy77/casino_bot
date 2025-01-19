@@ -31,13 +31,15 @@ func ServeIndex(w http.ResponseWriter, r *http.Request) {
 	var balance float64
 	err := data.DB.QueryRow("SELECT balance FROM user WHERE telegram_id = ?", telegramID).Scan(&balance)
 	if err != nil {
-		balance = 0.0 // Если пользователя нет, баланс по умолчанию
+		fmt.Println("Error fetching balance:", err) // Добавьте логирование для отладки
+		balance = 0.0
 	}
 
 	// Рендеринг шаблона
 	tmpl, err := template.New("index.html").Funcs(template.FuncMap{
-		"calcStars": calcStars, // Добавляем функцию для вычисления звёзд
-	}).ParseFiles("./static/index.html")
+		"calcStars": calcStars,
+	}).ParseFiles("web/static/index.html")
+
 	if err != nil {
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
@@ -86,7 +88,7 @@ func UpdateBalanceHandler(w http.ResponseWriter, r *http.Request) {
 // StartServer запускает HTTP сервер
 func StartServer() {
 	// Обработка статических файлов
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
 
 	// Обработка главной страницы
 	http.HandleFunc("/", ServeIndex)
