@@ -1,0 +1,193 @@
+/* Общий стиль страницы */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #001F3F, #001B36); /* Тёмно-синий градиент */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Верхняя панель */
+.top-bar {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.top-button {
+    background: #0044cc;
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Карточка баланса */
+.balance-card {
+    background: #1E1E2E; /* Темно-серый фон */
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+    margin-top: 100px;
+    width: 90%;
+    height: 240px; /* Увеличенная высота карточки */
+    position: relative; /* Для размещения элементов */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Лёгкий контур */
+}
+
+/* Основной баланс */
+.main-balance h2 {
+    font-size: 64px; /* Увеличенный шрифт для JPC */
+    font-weight: bold;
+    margin: 0;
+    color: white; /* Белый текст для JPC */
+    line-height: 100px; /* Центрирование текста */
+}
+
+/* Разделительная линия внутри карточки */
+.balance-divider {
+    border: none;
+    border-top: 1px solid #B0BEC5; /* Светло-серая линия */
+    margin: 20px 0; /* Отступы сверху и снизу */
+}
+
+/* Валюты внутри карточки */
+.other-balances {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px; /* Отступы от краёв карточки */
+    font-size: 18px; /* Увеличенный шрифт для валют */
+    color: #B0BEC5; /* Светло-серый цвет текста */
+}
+
+.other-balances .usdt,
+.other-balances .stars {
+    flex: 1; /* Равномерное распределение по ширине */
+    text-align: center; /* Центрирование текста */
+}
+
+/* Разделительные линии */
+.divider {
+    border: none;
+    border-top: 1px solid #555; /* Светло-серый разделитель */
+    width: 90%;
+    margin: 20px 0;
+}
+
+/* Управление счетом */
+.account-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.account-btn {
+    background: #0044cc;
+    border: none;
+    color: white;
+    font-size: 24px; /* Размер для смайликов */
+    width: 60px; /* Круглая форма */
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.account-btn:hover {
+    background: #0055ff;
+}
+
+/* Кнопки действий */
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Пространство между кнопками */
+    width: 90%;
+}
+
+.action-btn {
+    background: #0044cc;
+    border: none;
+    color: white;
+    font-size: 20px; /* Увеличенный текст */
+    padding: 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn:hover {
+    background: #0055ff;
+}
+
+/* Telegram ID */
+.telegram-id {
+    margin-top: 20px;
+    font-size: 14px; /* Увеличенный текст */
+    color: #B0BEC5; /* Светло-серый */
+    text-align: center;
+}
+
+/* Модальное окно */
+.modal {
+    display: none; /* Изначально скрыто */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+}
+
+/* Контент модального окна */
+.modal-content {
+    background-color: #1E1E2E;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+}
+
+/* Кнопка закрытия модального окна */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+}
+
+
