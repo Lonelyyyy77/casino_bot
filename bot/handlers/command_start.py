@@ -32,27 +32,37 @@ async def notify_referrer(referrer_id: int, new_user: str):
         )
 
 
-async def start_keyboard(message):
-    telegram_id = message.from_user.id
 
-    web_app_url = f"https://3306-91-234-26-155.ngrok-free.app?telegram_id={telegram_id}"
+async def start_keyboard(user_id: int):
+    """
+    Создаем Inline-клавиатуру, в которой web_app_url формируется,
+    используя переданный user_id напрямую.
+    """
+    web_app_url = f"https://92e6-91-234-26-159.ngrok-free.app?telegram_id={user_id}"
 
     kbds = InlineKeyboardBuilder()
-    kbds.row(InlineKeyboardButton(text='Открыть веб приложение', web_app={'url': web_app_url}))
+    kbds.row(
+        InlineKeyboardButton(
+            text='Открыть веб приложение',
+            web_app={'url': web_app_url}
+        )
+    )
     kbds.row(InlineKeyboardButton(text="Профиль", callback_data="office"))
     kbds.add(InlineKeyboardButton(text='Игры', callback_data='games'))
 
-    if is_admin(message.from_user.id):
+    if is_admin(user_id):
         kbds.row(InlineKeyboardButton(text="Админ-панель", callback_data="admin_panel"))
 
     return kbds.as_markup()
 
-
+# ------------------- Хендлер на /start -------------------
 @router.message(CommandStart())
 async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Не указано"
-    keyboard = await start_keyboard(message)
+
+    # сразу генерируем клавиатуру по user_id
+    keyboard = await start_keyboard(telegram_id)
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -64,6 +74,7 @@ async def start_handler(message: types.Message):
     user_data = cursor.fetchone()
 
     if not user_data:
+        # пользователь новый
         referrer_id = None
         if message.text and len(message.text.split()) > 1:
             try:
@@ -102,7 +113,7 @@ async def start_handler(message: types.Message):
             "<b>1) Запрещены мульти-аккаунты!</b>\n"
             "<b>2) Запрещены махинации, багаюз!</b>\n"
             "<b>3) Запрещён обман администрации!</b>\n\n"
-            "<b><a href='https://telegra.ph/LICENZIONNOE-SOGLAShENIE-WIN-SHARK-01-09'>ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ</a>🧾</b>",
+            "<b><a href='https://telegra.ph/LICENZIONNOE-SOGLAShENIE-WIN-SHARK-01-09'>ЛИЦЕНЗИОННОЕ СОГЛАСШЕНИЕ</a>🧾</b>",
             reply_markup=kb.as_markup(),
             parse_mode="HTML"
         )
@@ -114,19 +125,19 @@ async def start_handler(message: types.Message):
 
     balance_jpc = get_user_balance(telegram_id)
     balance_usd = balance_jpc
-
     balance_jpc = round(balance_jpc, 3)
     balance_usd = round(balance_usd, 3)
 
     await message.answer(
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\n"
+        f"Выберите, что хотите сделать:",
         reply_markup=keyboard
     )
 
     if is_new_user and referrer_id:
         await notify_referrer(referrer_id, username)
 
-
+# ------------------- Принятие правил -------------------
 @router.callback_query(lambda c: c.data == "accept")
 async def accept_rules(callback: types.CallbackQuery):
     telegram_id = callback.from_user.id
@@ -139,9 +150,10 @@ async def accept_rules(callback: types.CallbackQuery):
     conn.close()
 
     await callback.message.delete()
+    # Отправляем пользователя на капчу
     await start_captcha(callback)
 
-
+# ------------------- Обработка нажатия по капче -------------------
 @router.callback_query(lambda c: c.data.startswith("captcha:"))
 async def captcha_handler(callback: types.CallbackQuery):
     telegram_id = callback.from_user.id
@@ -160,6 +172,7 @@ async def captcha_handler(callback: types.CallbackQuery):
     expected_fruit = result[0]
 
     if selected_fruit == expected_fruit:
+        # Удаляем запись капчи и ставим флаг, что капча пройдена
         cursor.execute("DELETE FROM captcha WHERE telegram_id = ?", (telegram_id,))
         cursor.execute("UPDATE user SET has_completed_captcha = 1 WHERE telegram_id = ?", (telegram_id,))
         conn.commit()
@@ -167,7 +180,8 @@ async def captcha_handler(callback: types.CallbackQuery):
 
         await callback.message.delete()
 
-        keyboard = await start_keyboard(callback.message)  # Создайте функцию start_keyboard, если её нет
+        # (!) Генерируем клавиатуру, передавая user_id напрямую
+        keyboard = await start_keyboard(telegram_id)
         await callback.message.answer(
             "Капча успешно пройдена! Добро пожаловать!",
             reply_markup=keyboard
@@ -176,14 +190,15 @@ async def captcha_handler(callback: types.CallbackQuery):
         conn.close()
         await callback.answer("Неправильный выбор. Попробуйте ещё раз.", show_alert=True)
 
-
+# ------------------- Функция показа капчи -------------------
 async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
+    """
+    Функция, которая отправляет капчу. Принимает либо CallbackQuery, либо Message.
+    """
     telegram_id = source.from_user.id
 
     fruits = ["🍎", "🍌", "🍇", "🍍", "🍓", "🍒", "🥝", "🍑", "🍊", "🍋", "🍈", "🍉"]
-
     selected_fruit = random.choice(fruits)
-
     expected_fruit = selected_fruit
 
     conn = sqlite3.connect(DB_NAME)
@@ -203,16 +218,11 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
         ]
         kb.row(*buttons)
 
+    caption_text = f"Для подтверждения, выберите правильный фрукт: {selected_fruit}"
     if isinstance(source, types.CallbackQuery):
-        await source.message.answer(
-            f"Для подтверждения, выберите правильный фрукт: {selected_fruit}",
-            reply_markup=kb.as_markup()
-        )
+        await source.message.answer(caption_text, reply_markup=kb.as_markup())
     elif isinstance(source, types.Message):
-        await source.answer(
-            f"Для подтверждения, выберите правильный фрукт: {selected_fruit}",
-            reply_markup=kb.as_markup()
-        )
+        await source.answer(caption_text, reply_markup=kb.as_markup())
 
 
 @router.callback_query(lambda c: c.data == 'home')

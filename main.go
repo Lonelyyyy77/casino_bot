@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -12,108 +13,108 @@ import (
 
 var db *sql.DB
 
-// Структура для обработки входящих данных
-type TelegramIDRequest struct {
-	TelegramID string `json:"telegram_id"`
-}
-
 // Инициализация базы данных
 func initDB() {
 	var err error
-	db, err = sql.Open("sqlite3", "./main2.db")
+	db, err = sql.Open("sqlite3", "./bot.db") // Используем вашу базу данных
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Создание таблицы, если она не существует
-	query := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		telegram_id TEXT UNIQUE NOT NULL
-	);
-	`
-	_, err = db.Exec(query)
+	// Проверяем подключение к базе
+	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Ошибка подключения к базе данных:", err)
 	}
-	fmt.Println("База данных инициализирована!")
+	fmt.Println("База данных подключена!")
 }
 
-// Обработчик для сохранения Telegram ID
-func saveTelegramID(w http.ResponseWriter, r *http.Request) {
+// Главная страница
+func mainPageHandler(w http.ResponseWriter, r *http.Request) {
+ telegramID := r.URL.Query().Get("telegram_id")
+ if telegramID == "" {
+  http.Error(w, "telegram_id is required", http.StatusBadRequest)
+  return
+ }
+
+ var balance float64
+ err := db.QueryRow("SELECT balance FROM user WHERE telegram_id = ?", telegramID).Scan(&balance)
+
+ // Если пользователь не найден, создаём новую запись
+ if err == sql.ErrNoRows {
+  _, insertErr := db.Exec("INSERT INTO user (telegram_id, balance) VALUES (?, 0)", telegramID)
+  if insertErr != nil {
+   http.Error(w, "Failed to create user", http.StatusInternalServerError)
+   return
+  }
+  balance = 0 // Новый пользователь с балансом 0
+ } else if err != nil {
+  http.Error(w, "Database error", http.StatusInternalServerError)
+  return
+ }
+
+ // Передаём данные в HTML
+ data := struct {
+  TelegramID string
+  Balance    float64
+ }{
+  TelegramID: telegramID,
+  Balance:    balance,
+ }
+
+ tmpl, err := template.ParseFiles("./static/index.html")
+ if err != nil {
+  http.Error(w, "Error parsing template", http.StatusInternalServerError)
+  return
+ }
+
+ tmpl.Execute(w, data)
+}
+
+
+// Обновление баланса
+func updateBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var req TelegramIDRequest
+	// Парсим данные из запроса
+	var req struct {
+		TelegramID string  `json:"telegram_id"`
+		Amount     float64 `json:"amount"`
+	}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil || req.TelegramID == "" {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Сохранение Telegram ID в базе данных
-	query := `INSERT INTO users (telegram_id) VALUES (?) ON CONFLICT(telegram_id) DO NOTHING;`
-	_, err = db.Exec(query, req.TelegramID)
+	// Обновляем баланс в базе данных
+	_, err = db.Exec("UPDATE user SET balance = balance + ? WHERE telegram_id = ?", req.Amount, req.TelegramID)
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		http.Error(w, "Failed to update balance", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Telegram ID %s сохранён!", req.TelegramID)
-}
-
-func handleTelegramID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req TelegramIDRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil || req.TelegramID == "" {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	// Вывод Telegram ID в консоль
-	fmt.Printf("Получен Telegram ID: %s\n", req.TelegramID)
-
-	// Отправка ответа клиенту
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Telegram ID %s успешно обработан!", req.TelegramID)
-
-	// --- LOGGING
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Запрос: %s %s", r.Method, r.URL.Path)
-		http.NotFound(w, r)
-	})
-
+	fmt.Fprintf(w, "Balance updated successfully for Telegram ID %s", req.TelegramID)
 }
 
 func main() {
 	initDB()
 	defer db.Close()
 
-	// Главная страница (корневой маршрут)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/index.html")
-	})
+	// Раздача статических файлов
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// прием статик файлов
-	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	// Основной маршрут
+	http.HandleFunc("/", mainPageHandler)
 
-	// маршрут для сохранения ID
-	http.HandleFunc("/save_telegram_id", saveTelegramID)
+	// Маршрут обновления баланса
+	http.HandleFunc("/update_balance", updateBalanceHandler)
 
-	http.Handle("/telegram.js", http.FileServer(http.Dir(".")))
-
-	// Маршрут для вывода Telegram ID в консоль
-	http.HandleFunc("/handle_telegram_id", handleTelegramID)
-
-	// localhost
 	fmt.Println("Сервер запущен на http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

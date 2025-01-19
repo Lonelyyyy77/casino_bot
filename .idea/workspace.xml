@@ -5,18 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/bot/handlers/user/inline_send.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/database/user/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/user/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot.db" beforeDir="false" afterPath="$PROJECT_DIR$/bot.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot/handlers/command_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/command_start.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers/routers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/routers/routers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/user/inline_send.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/inline_send.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main2.db" beforeDir="false" afterPath="$PROJECT_DIR$/main2.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main2.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/static/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/telegram.js" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

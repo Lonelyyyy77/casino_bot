@@ -16,12 +16,13 @@ router = Router()
 @router.inline_query()
 async def inline_query_handler(query: types.InlineQuery):
     """
-    1) Парсим "10 @User [коммент]" из query.query.
-    2) Отправляем получателю ЛС (с кнопкой "Получить") прямо из этого хендлера.
-    3) Возвращаем карточку в инлайн‑меню.
-
-    ВНИМАНИЕ: Этот подход может вызывать спам, т.к. inline_query
-    вызывается при КАЖДОМ вводе символа, и юзер может НЕ выбрать этот результат.
+    Пользователь вводит: "10 @User [коммент]"
+    Бот парсит:
+      - amount (сумма)
+      - @User (получатель)
+      - [коммент] (необязательно)
+    И возвращает одну инлайн-карточку.
+    При выборе карточки в чат отправляется сообщение с кнопкой "Получить".
     """
     text = query.query.strip()
     if not text:
@@ -29,78 +30,85 @@ async def inline_query_handler(query: types.InlineQuery):
         return
 
     parts = text.split(maxsplit=2)
-    amount_str = parts[0] if len(parts) > 0 else "0"
-    recipient_mention = parts[1] if len(parts) > 1 else "@???"
+    if len(parts) < 2:
+        # Недостаточно данных (нет суммы или получателя)
+        await query.answer([], cache_time=1)
+        return
+
+    amount_str = parts[0]
+    recipient_mention = parts[1]  # например "@SomeUser"
     comment = parts[2] if len(parts) > 2 else ""
 
-    # Попробуем определить сумму, получателя и отправителя
+    # Парсим сумму
     try:
         amount = int(amount_str)
     except ValueError:
         amount = 0
 
+    # Информация об отправителе (текущий пользователь)
     sender_id = query.from_user.id
     sender_username = query.from_user.username or "UnknownUser"
 
-    # Обрежем "@" у получателя
+    # Обрезаем "@" у получателя
     recipient_username = recipient_mention.lstrip("@")
-    recipient_data = get_user_by_username(recipient_username) if recipient_username else None
+    recipient_data = get_user_by_username(recipient_username)
 
-    # Создаём текст, который попадёт в чат при выборе карточки
+    # Тексты для карточки
     title = f"Отправить {amount} JPC"
     description = f"Получатель: {recipient_mention}, Комментарий: {comment}"
     message_text = f"Попытка перевода {amount} JPC => {recipient_mention}\n{comment}"
 
-    # Формируем саму карточку для инлайн‑меню
+    if not recipient_data:
+        # Если пользователя не нашли, в демо-режиме покажем заглушку
+        title = "Ошибка: получатель не найден"
+        description = "Проверьте @username"
+
+    # Формируем callback_data. Храним ID получателя, чтобы точно знать, кто может "забрать" монеты.
+    recipient_id = recipient_data["telegram_id"] if recipient_data else 0
+    callback_data = f"inline_trade:{sender_id}:{recipient_id}:{amount}:{comment}"
+
+    # Инлайн-клавиатура
+    kb_builder = InlineKeyboardBuilder()
+    kb_builder.button(
+        text="Получить",
+        callback_data=callback_data
+    )
+    kb = kb_builder.as_markup()
+
+    # Создаём результат инлайн-запроса
     result = InlineQueryResultArticle(
         id="transfer_coins",
         title=title,
         description=description,
         input_message_content=InputTextMessageContent(
             message_text=message_text
-        )
+        ),
+        reply_markup=kb  # прикрепляем кнопку
     )
-
-    # Отправляем уведомление получателю (с кнопкой "Получить")
-    # ПРЕДУПРЕЖДЕНИЕ: это вызовется при КАЖДОМ inline_query — потенциальный СПАМ
-    if recipient_data and amount > 0:
-        recipient_tg_id = recipient_data["telegram_id"]
-
-        callback_data = f"inline_trade:{sender_id}:{recipient_tg_id}:{amount}:{comment}"
-        kb = InlineKeyboardBuilder()
-        kb.row(InlineKeyboardButton(text="Получить", callback_data=callback_data))
-
-        try:
-            await bot.send_message(
-                recipient_tg_id,
-                (
-                    f"[IN INLINE_QUERY] Вам хотят отправить {amount} JPC от @{sender_username}\n"
-                    f"Комментарий: {comment}\n\n"
-                    "Нажмите кнопку, чтобы получить."
-                ),
-                reply_markup=kb
-            )
-            logging.info("Уведомление отправлено получателю (в inline_query).")
-        except Exception as e:
-            logging.warning(f"Не удалось отправить ЛС получателю: {e}")
 
     # Возвращаем одну карточку
     await query.answer([result], cache_time=1)
 
-
 @router.callback_query(lambda c: c.data.startswith("inline_trade:"))
 async def callback_handler(call: types.CallbackQuery):
-    data = call.data or ""
-    if not data.startswith("inline_trade:"):
-        await call.answer("Неизвестный колбэк", show_alert=False)
-        return
-
-    parts = data.split(":", 4)
+    """
+    Формат callback_data: "inline_trade:<sender_id>:<recipient_id>:<amount>:<comment>"
+    По нажатию на кнопку "Получить" проверяем:
+      - Тот ли юзер нажал
+      - Хватает ли баланса у отправителя
+      - Выполняем перевод
+      - Редактируем сообщение (кнопка исчезает)
+      - Сообщаем отправителю, что перевод принят
+    """
+    data = call.data
+    parts = data.split(":", 4)  # ["inline_trade", "123456", "222222", "10", "какой-то_коммент"]
     if len(parts) < 5:
         await call.answer("Неверные данные.", show_alert=True)
         return
 
     _, sender_str, recipient_str, amount_str, comment = parts
+
+    # Парсим все числа
     try:
         sender_id = int(sender_str)
         recipient_id = int(recipient_str)
@@ -109,26 +117,49 @@ async def callback_handler(call: types.CallbackQuery):
         await call.answer("Некорректные параметры.", show_alert=True)
         return
 
+    # Проверяем, что нажал именно тот пользователь, которому предназначен перевод
     if call.from_user.id != recipient_id:
         await call.answer("Вы не тот пользователь, кому предназначен перевод!", show_alert=True)
         return
 
-    # Проверяем баланс у отправителя
+    # Проверяем баланс отправителя
     sender_balance = get_user_balance(sender_id)
     if sender_balance < amount:
         await call.answer("У отправителя уже недостаточно средств!", show_alert=True)
         return
 
-    # Выполняем перевод
+    # Всё ок — выполняем перевод
     update_user_balance(sender_id, -amount)
     update_user_balance(recipient_id, amount)
 
+    # Отвечаем пользователю (alert) и далее редактируем сообщение
     await call.answer("Монеты зачислены!", show_alert=True)
-    await call.message.edit_text(
-        f"Вы получили {amount} JPC.\nКомментарий: {comment}"
+
+    # --- Убираем (или редактируем) сообщение, чтобы кнопку нельзя было нажать второй раз ---
+    new_text = (
+        f"@{call.from_user.username or call.from_user.id} "
+        f"получил {amount} JPC.\nКомментарий: {comment}"
+        f"Операция успешна ✅"
     )
-    # Уведомим отправителя
+
+    # Если call.message есть (обычное сообщение)
+    if call.message:
+        try:
+            await call.message.edit_text(new_text)
+        except Exception as e:
+            logging.warning(f"Не удалось изменить сообщение: {e}")
+    else:
+        # Может быть inline_message_id, если это "инлайн-режим без сообщения"
+        try:
+            await bot.edit_message_text(
+                inline_message_id=call.inline_message_id,
+                text=new_text
+            )
+        except Exception as e:
+            logging.warning(f"Не удалось изменить inline-сообщение: {e}")
+
+    # Уведомим отправителя, что перевод принят
     try:
-        await bot.send_message(sender_id, f"Получатель подтвердил перевод {amount} JPC.")
-    except:
-        pass
+        await bot.send_message(sender_id, f"Получатель {recipient_id} подтвердил перевод {amount} JPC.")
+    except Exception as e:
+        logging.warning(f"Не удалось уведомить отправителя: {e}")
