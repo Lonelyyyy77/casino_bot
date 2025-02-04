@@ -6,7 +6,8 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from states.admin.states import MailingState
-from ...database import DB_NAME
+from database import DB_NAME
+
 
 router = Router()
 

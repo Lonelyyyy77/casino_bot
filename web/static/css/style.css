@@ -283,7 +283,7 @@ body {
 .close:focus {
 
     color: #0062ff;
-    transition: 500ms;
+    transition: 200ms;
     text-decoration: none;
 }
 

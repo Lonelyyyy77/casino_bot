@@ -10,19 +10,20 @@
 <body>
     <!-- Верхняя панель -->
     <div class="top-bar">
-        <button class="top-button free-spin-btn" id="freespin-btn">🎁</button>
+        <a href="/freespin?telegram_id={{.TelegramID}}" class="top-button free-spin-btn" id="freespin-btn">🎁</a>
+        <!-- Удаляем ссылку для слотов из верхней панели -->
         <button class="top-button account-btn" id="account-btn">👤</button>
     </div>
 
     <!-- Карточка баланса -->
     <div class="balance-card">
         <div class="main-balance">
-            <h2>{{.Balance}} JPC</h2>
+            <h2><h2>{{ printf "%.2f" .Balance }}</h2> JPC</h2>
         </div>
         <hr class="balance-divider">
         <div class="other-balances">
-            <div class="usdt">{{.Balance}} USDT</div>
-            <div class="stars">{{printf "%.0f" (calcStars .Balance)}} STARS</div>
+            <div class="usdt">{{ printf "%.2f" .Balance }} USDT</div>
+            <div class="stars">{{printf "%.0f" (calcStars .Balance)}} ✩</div>
         </div>
     </div>
 
@@ -43,7 +44,8 @@
     <!-- Кнопки действий -->
     <div class="actions">
         <button class="action-btn" id="casino-btn">ROULETTE</button>
-        <button class="action-btn">SLOTS</button>
+        <!-- Переделываем кнопку SLOTS в ссылку с передачей telegram_id -->
+        <a href="/slots/?telegram_id={{.TelegramID}}" class="action-btn">SLOTS</a>
         <button class="action-btn">LOTTERY</button>
     </div>
 

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Spin</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/freespin.css">
+</head>
+<body>
+    <!-- Верхняя панель -->
+    <div class="top-bar">
+        <a href="#" class="top-button back-btn" id="back-btn"><-</a>
+    </div>
+
+    <!-- Контейнер для страницы фриспина -->
+    <div class="freespin-page">
+        <!-- Заголовок -->
+        <div class="freespin-header">
+            <h1>Free Spin</h1>
+        </div>
+
+        <!-- Прокручиваемые карточки -->
+        <div class="spin-cards">
+            <div class="spin-card">
+                <div class="spin-value">100</div>
+                <div class="spin-label">JPC</div>
+            </div>
+            <div class="spin-card">
+                <div class="spin-value">50</div>
+                <div class="spin-label">JPC</div>
+            </div>
+            <div class="spin-card">
+                <div class="spin-value">10</div>
+                <div class="spin-label">JPC</div>
+            </div>
+        </div>
+
+        <!-- Баланс и кнопка -->
+        <div class="spin-info">
+            <div class="balance-info">
+                <span class="balance-text">Ваш баланс:</span>
+                <span class="balance-amount">{{.Balance}} JPC</span>
+            </div>                                   
+            <button class="spin-button" id="spin-now-btn">Крутить бесплатно</button>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+    <script src="/static/js/freespin.js"></script>
+</body>
+</html>
