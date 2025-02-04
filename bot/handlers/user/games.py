@@ -187,4 +187,5 @@ def get_game_keyboard(current_bet):
         InlineKeyboardButton(text=f'{current_bet:.1f} USDT', callback_data='current_bet'),
         InlineKeyboardButton(text='⬇️', callback_data='decrease_bet'),
     )
+    kb.row(InlineKeyboardButton(text='🔙 Назад', callback_data='home'))
     return kb.as_markup()

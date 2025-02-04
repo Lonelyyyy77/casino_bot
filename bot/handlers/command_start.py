@@ -32,7 +32,6 @@ async def notify_referrer(referrer_id: int, new_user: str):
         )
 
 
-
 async def start_keyboard(user_id: int):
     """
     Создаем Inline-клавиатуру, в которой web_app_url формируется,
@@ -55,7 +54,7 @@ async def start_keyboard(user_id: int):
 
     return kbds.as_markup()
 
-# ------------------- Хендлер на /start -------------------
+
 @router.message(CommandStart())
 async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
@@ -137,7 +136,7 @@ async def start_handler(message: types.Message):
     if is_new_user and referrer_id:
         await notify_referrer(referrer_id, username)
 
-# ------------------- Принятие правил -------------------
+
 @router.callback_query(lambda c: c.data == "accept")
 async def accept_rules(callback: types.CallbackQuery):
     telegram_id = callback.from_user.id
@@ -150,10 +149,9 @@ async def accept_rules(callback: types.CallbackQuery):
     conn.close()
 
     await callback.message.delete()
-    # Отправляем пользователя на капчу
     await start_captcha(callback)
 
-# ------------------- Обработка нажатия по капче -------------------
+
 @router.callback_query(lambda c: c.data.startswith("captcha:"))
 async def captcha_handler(callback: types.CallbackQuery):
     telegram_id = callback.from_user.id
@@ -172,7 +170,6 @@ async def captcha_handler(callback: types.CallbackQuery):
     expected_fruit = result[0]
 
     if selected_fruit == expected_fruit:
-        # Удаляем запись капчи и ставим флаг, что капча пройдена
         cursor.execute("DELETE FROM captcha WHERE telegram_id = ?", (telegram_id,))
         cursor.execute("UPDATE user SET has_completed_captcha = 1 WHERE telegram_id = ?", (telegram_id,))
         conn.commit()
@@ -190,7 +187,7 @@ async def captcha_handler(callback: types.CallbackQuery):
         conn.close()
         await callback.answer("Неправильный выбор. Попробуйте ещё раз.", show_alert=True)
 
-# ------------------- Функция показа капчи -------------------
+
 async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
     """
     Функция, которая отправляет капчу. Принимает либо CallbackQuery, либо Message.
@@ -229,21 +226,24 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
 async def home(source: Union[types.CallbackQuery, types.Message]):
     telegram_id = source.from_user.id
 
+    keyboard = await start_keyboard(telegram_id)
+
     balance_jpc = get_user_balance(telegram_id)
-    balance_usd = balance_jpc
-
+    balance_usd = round(balance_jpc, 3)
     balance_jpc = round(balance_jpc, 3)
-    balance_usd = round(balance_usd, 3)
 
-    keyboard = await start_keyboard(source.message)
+    text = (
+        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\n"
+        f"Выберите, что хотите сделать:"
+    )
 
     if isinstance(source, types.CallbackQuery):
         await source.message.edit_text(
-            f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+            text,
             reply_markup=keyboard
         )
-    elif isinstance(source, types.Message):
+    else:
         await source.answer(
-            f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\nВыберите, что хотите сделать:",
+            text,
             reply_markup=keyboard
         )

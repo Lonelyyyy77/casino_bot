@@ -89,17 +89,9 @@ async def inline_query_handler(query: types.InlineQuery):
     # Возвращаем одну карточку
     await query.answer([result], cache_time=1)
 
+
 @router.callback_query(lambda c: c.data.startswith("inline_trade:"))
 async def callback_handler(call: types.CallbackQuery):
-    """
-    Формат callback_data: "inline_trade:<sender_id>:<recipient_id>:<amount>:<comment>"
-    По нажатию на кнопку "Получить" проверяем:
-      - Тот ли юзер нажал
-      - Хватает ли баланса у отправителя
-      - Выполняем перевод
-      - Редактируем сообщение (кнопка исчезает)
-      - Сообщаем отправителю, что перевод принят
-    """
     data = call.data
     parts = data.split(":", 4)  # ["inline_trade", "123456", "222222", "10", "какой-то_коммент"]
     if len(parts) < 5:
@@ -132,29 +124,38 @@ async def callback_handler(call: types.CallbackQuery):
     update_user_balance(sender_id, -amount)
     update_user_balance(recipient_id, amount)
 
-    # Отвечаем пользователю (alert) и далее редактируем сообщение
+    # Отвечаем пользователю (alert)
     await call.answer("Монеты зачислены!", show_alert=True)
 
-    # --- Убираем (или редактируем) сообщение, чтобы кнопку нельзя было нажать второй раз ---
-    new_text = (
-        f"@{call.from_user.username or call.from_user.id} "
-        f"получил {amount} JPC.\nКомментарий: {comment}"
-        f"Операция успешна ✅"
+    # *! Получаем информацию об отправителе, чтобы вставить его имя/юзернейм
+    try:
+        sender_chat = await bot.get_chat(sender_id)
+        # Если нет username — используем full_name или на крайний случай сам sender_id
+        sender_username = sender_chat.username or sender_chat.full_name or str(sender_id)
+    except Exception:
+        sender_username = str(sender_id)
+
+    # *! Пишем получателю, от кого и сколько пришло
+    await bot.send_message(
+        recipient_id,
+        f"Вам было зачислено {amount} JPC от @{sender_username}."
     )
 
-    # Если call.message есть (обычное сообщение)
+    # --- Редактируем старое сообщение, чтобы кнопку нельзя было нажать повторно ---
+    new_text = (
+        f"@{call.from_user.username or call.from_user.id} получил {amount} JPC.\n"
+        f"Комментарий: {comment}\n"
+        "Операция успешна ✅"
+    )
+
     if call.message:
         try:
             await call.message.edit_text(new_text)
         except Exception as e:
             logging.warning(f"Не удалось изменить сообщение: {e}")
     else:
-        # Может быть inline_message_id, если это "инлайн-режим без сообщения"
         try:
-            await bot.edit_message_text(
-                inline_message_id=call.inline_message_id,
-                text=new_text
-            )
+            await bot.edit_message_text(inline_message_id=call.inline_message_id, text=new_text)
         except Exception as e:
             logging.warning(f"Не удалось изменить inline-сообщение: {e}")
 

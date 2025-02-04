@@ -79,6 +79,16 @@ def initialize_database():
         );
     ''')
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_id TEXT,
+            user_id INTEGER,
+            jpc_amount REAL,
+            status TEXT
+        )
+        """)
+
     conn.commit()
     conn.close()
 
