@@ -125,7 +125,7 @@ func ServeFreeSpin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// StartServer запускает HTTP сервер
+// StartServer запускает HTTP сервер и регистрирует все обработчики, включая новые для слотов.
 func StartServer() {
 
 	// Обработка статических файлов

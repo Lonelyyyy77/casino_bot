@@ -14,20 +14,17 @@ import (
 	"main.go/data" // используем существующий пакет для доступа к БД (data.DB)
 )
 
-// SlotMachine инкапсулирует логику игры и работу с БД.
-type SlotMachine struct {
-	DB *sql.DB
-}
-
 // PlayResponse – структура ответа на игровой запрос.
 type PlayResponse struct {
 	Status      string   `json:"status"`
-	Message     string   `json:"message"` // loss, small, medium, big, jackpot, freespin
+	Message     string   `json:"message"` // loss, micro_win, small, medium, big, jackpot, freespin
 	Reels       []string `json:"reels"`
 	WinAmount   float64  `json:"win_amount"`
 	NewBalance  float64  `json:"new_balance"`
 	FreeSpins   int      `json:"free_spins"`
 	JackpotText string   `json:"jackpot_text,omitempty"`
+	// Если проигрышной (без выигрыша), возвращается визуальный бонус (только для отображения)
+	VisualChanceText string `json:"visualChanceText,omitempty"`
 }
 
 // User – структура с данными пользователя (из таблицы user).
@@ -48,6 +45,23 @@ const (
 )
 
 var baseSymbols = []string{"🐬", "🐟", "🐙", "💎", "🌊"}
+
+// Расширенный запрос от клиента – теперь включаем выбор режима FS, количество FS и визуальный бонус
+type ExtendedPlayRequest struct {
+	TelegramID string  `json:"telegram_id"`
+	Bet        float64 `json:"bet"`
+	// Режим игры: "normal" или "fs". Если "fs", то используются фриспины.
+	Mode string `json:"mode"`
+	// Количество фриспинов, которое игрок хочет потратить (если Mode == "fs")
+	FSCount int `json:"fsCount"`
+	// Значение для визуализации «накрученного шанса» (передаётся с клиента)
+	VisualChance int `json:"visualChance"`
+}
+
+// SlotMachine инкапсулирует логику игры и работу с БД.
+type SlotMachine struct {
+	DB *sql.DB
+}
 
 // New возвращает новый экземпляр SlotMachine, используя data.DB
 func New() *SlotMachine {
@@ -168,15 +182,10 @@ func (sm *SlotMachine) generateReels(outcome string) []string {
 	}
 }
 
-// Play обрабатывает игровой запрос.
-// Ожидается JSON с telegram_id, bet и mode ("normal" или "fs").
+// Play обрабатывает игровой запрос с учётом нового функционала выбора фриспинов и визуального бонуса.
+// Клиент отправляет расширенный JSON с полями: telegram_id, bet, mode ("normal" или "fs"), fsCount и visualChance.
 func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
-	type PlayRequest struct {
-		TelegramID string  `json:"telegram_id"`
-		Bet        float64 `json:"bet"`
-		Mode       string  `json:"mode"`
-	}
-	var req PlayRequest
+	var req ExtendedPlayRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -193,20 +202,22 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 	}
 
 	useFreeSpin := false
+	// Если режим игры "fs" выбран, проверяем, достаточно ли фриспинов и списываем их в соответствии с FSCount.
 	if req.Mode == "fs" {
-		if user.FreeSpins > 0 {
+		if user.FreeSpins >= req.FSCount {
 			useFreeSpin = true
-			user.FreeSpins--
+			user.FreeSpins -= req.FSCount
 			_ = sm.updateFreeSpins(req.TelegramID, user.FreeSpins)
+		} else {
+			http.Error(w, "Недостаточно фриспинов", http.StatusBadRequest)
+			return
 		}
-	}
-
-	if !useFreeSpin {
+	} else {
+		// Если не используется режим FS, списываем ставку с баланса.
 		if user.Balance < req.Bet {
 			http.Error(w, "Insufficient balance", http.StatusBadRequest)
 			return
 		}
-		// Списываем ставку
 		_ = sm.updateUserBalance(req.TelegramID, -req.Bet, 0)
 		// Обновляем джекпот: 5% от ставки
 		jackpot, _ := sm.getJackpot()
@@ -214,7 +225,7 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 		_ = sm.updateJackpot(jackpot)
 	}
 
-	// Определяем исход игры
+	// Определяем исход игры с помощью случайного числа (0-100)
 	rFloat := rand.Float64() * 100
 	outcome := "loss"
 	multiplier := 0.0
@@ -239,12 +250,33 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 		_ = sm.updateFreeSpins(req.TelegramID, user.FreeSpins)
 	}
 
+	// Если используется режим FS и исход выигрышный, корректируем множитель в зависимости от количества потраченных FS.
+	if useFreeSpin && (outcome == "small" || outcome == "medium" || outcome == "big" || outcome == "jackpot") {
+		switch req.FSCount {
+		case 10:
+			multiplier = multiplier * 1.5
+		case 30:
+			multiplier = multiplier * 2.0
+		default:
+			multiplier = multiplier * 1.2
+		}
+	}
+
 	winAmount := 0.0
 	jackpotText := ""
+	// Новая логика выигрыша: если исход выигрышный, начисляем выигрыш по коэффициенту.
 	if outcome == "small" || outcome == "medium" || outcome == "big" || outcome == "jackpot" {
 		winAmount = req.Bet * multiplier
 		_ = sm.updateUserBalance(req.TelegramID, winAmount, winAmount)
-	}
+	} else if outcome == "loss" {
+		// Если проигрыш, выдаём микро-выигрыш (10% от ставки) и записываем визуальный бонус для мотивации.
+		winAmount = req.Bet * 0.10
+		outcome = "micro_win"
+		_ = sm.updateUserBalance(req.TelegramID, winAmount, winAmount)
+		// Здесь значение VisualChance используется только для визуализации (накрученный шанс)
+	} // freespin исход уже обработан ранее
+
+	// Если джекпот, дополнительно начисляем джекпот и сбрасываем его.
 	if outcome == "jackpot" {
 		jackpotWon, _ := sm.getJackpot()
 		winAmount += jackpotWon
@@ -253,17 +285,24 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 		_ = sm.updateJackpot(0)
 	}
 
+	// Если проигрыш (micro_win), устанавливаем визуальный бонус на основе переданного значения
+	var visualChanceText string
+	if outcome == "micro_win" {
+		visualChanceText = fmt.Sprintf("+%d%% к шансу", req.VisualChance)
+	}
+
 	reels := sm.generateReels(outcome)
 	updatedUser, _ := sm.getUser(req.TelegramID)
 
 	resp := PlayResponse{
-		Status:      "ok",
-		Message:     outcome,
-		Reels:       reels,
-		WinAmount:   winAmount,
-		NewBalance:  updatedUser.Balance,
-		FreeSpins:   updatedUser.FreeSpins,
-		JackpotText: jackpotText,
+		Status:           "ok",
+		Message:          outcome,
+		Reels:            reels,
+		WinAmount:        winAmount,
+		NewBalance:       updatedUser.Balance,
+		FreeSpins:        updatedUser.FreeSpins,
+		JackpotText:      jackpotText,
+		VisualChanceText: visualChanceText,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)

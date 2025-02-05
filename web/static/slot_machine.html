@@ -36,62 +36,75 @@
         <!-- Скрытый элемент для передачи telegram_id -->
         <div id="telegram-id" style="display:none;">{{.TelegramID}}</div>
     </div>
-    
+
+    <!-- Блок выбора фриспинов -->
+<div class="free-spins">
+    <p>Фриспины: <span id="fs-counter">{{.FreeSpins}}</span></p>
+    <div class="fs-buttons">
+      <button class="fs-btn" data-fs="1">Использовать 1 FS</button>
+      <button class="fs-btn" data-fs="10">Использовать 10 FS</button>
+      <button class="fs-btn" data-fs="30">Использовать 30 FS</button>
+    </div>
+    <p id="fs-visual-chance">Дополнительный шанс: 0%</p>
+  </div>
+
     <script>
         const telegramID = document.getElementById("telegram-id").textContent;
 
-        async function fetchTopPlayers() {
-            const res = await fetch("/slots/top");
-            const players = await res.json();
-            const list = document.getElementById("top-list");
-            list.innerHTML = "";
-            players.forEach(player => {
-                const li = document.createElement("li");
-                li.textContent = `${player.username}: ${player.total_win.toFixed(2)} USDT`;
-                list.appendChild(li);
-            });
-        }
+async function fetchTopPlayers() {
+    const res = await fetch("/slots/top");
+    const players = await res.json();
+    const list = document.getElementById("top-list");
+    list.innerHTML = "";
+    players.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = `${player.username}: ${player.total_win.toFixed(2)} USDT`;
+        list.appendChild(li);
+    });
+}
 
-        async function playGame() {
-            const betInput = document.getElementById("bet");
-            const bet = parseFloat(betInput.value);
-            if (isNaN(bet) || bet < 0.1 || bet > 30) {
-                alert("Введите корректную ставку (0.1-30)");
-                return;
-            }
-            const fsMode = document.getElementById("fs_mode").checked;
-            const response = await fetch("/slots/play", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ telegram_id: telegramID, bet: bet, mode: fsMode ? "fs" : "normal" })
-            });
-            const data = await response.json();
-            document.getElementById("balance").textContent = data.new_balance.toFixed(2);
-            document.getElementById("freespins").textContent = data.free_spins;
-            const reelsDiv = document.getElementById("reels");
-            reelsDiv.innerHTML = "";
-            data.reels.forEach(symbol => {
-                const reelDiv = document.createElement("div");
-                reelDiv.className = "reel";
-                reelDiv.textContent = symbol;
-                reelsDiv.appendChild(reelDiv);
-            });
-            let resultText = "";
-            if (data.message === "loss") {
-                resultText = `Вы проиграли ставку ${bet} JPC.`;
-            } else if (data.message === "freespin") {
-                resultText = `Вы выиграли повтороный спин! Теперь у вас ${data.free_spins} бесплатных вращений.`;
-            } else if (data.message === "jackpot") {
-                resultText = `Джекпот! Вы выиграли ${data.win_amount.toFixed(2)} JPC. ${data.jackpot_text}`;
-            } else {
-                resultText = `Вы выиграли ${data.win_amount.toFixed(2)} JPC (тип: ${data.message}).`;
-            }
-            document.getElementById("result").textContent = resultText;
-            fetchTopPlayers();
-        }
+async function playGame() {
+    const betInput = document.getElementById("bet");
+    const bet = parseFloat(betInput.value);
+    if (isNaN(bet) || bet < 0.1 || bet > 30) {
+        alert("Введите корректную ставку (0.1-30)");
+        return;
+    }
+    const fsMode = document.getElementById("fs_mode").checked;
+    const response = await fetch("/slots/play", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegram_id: telegramID, bet: bet, mode: fsMode ? "fs" : "normal" })
+    });
+    const data = await response.json();
+    document.getElementById("balance").textContent = data.new_balance.toFixed(2);
+    document.getElementById("freespins").textContent = data.free_spins;
+    const reelsDiv = document.getElementById("reels");
+    reelsDiv.innerHTML = "";
+    data.reels.forEach(symbol => {
+        const reelDiv = document.createElement("div");
+        reelDiv.className = "reel";
+        reelDiv.textContent = symbol;
+        reelsDiv.appendChild(reelDiv);
+    });
+    let resultText = "";
+    if (data.message === "loss") {
+        resultText = `Вы проиграли ставку ${bet} JPC.`;
+    } else if (data.message === "freespin") {
+        resultText = `Вы выиграли повтороный спин! Теперь у вас ${data.free_spins} бесплатных вращений.`;
+    } else if (data.message === "jackpot") {
+        resultText = `Джекпот! Вы выиграли ${data.win_amount.toFixed(2)} JPC. ${data.jackpot_text}`;
+    } else {
+        resultText = `Вы выиграли ${data.win_amount.toFixed(2)} JPC (тип: ${data.message}).`;
+    }
+    document.getElementById("result").textContent = resultText;
+    fetchTopPlayers();
+}
 
-        document.getElementById("spin").addEventListener("click", playGame);
-        fetchTopPlayers();
+document.getElementById("spin").addEventListener("click", playGame);
+fetchTopPlayers();
+
     </script>
+    <script src="/static/js/slot_machine.js"></script>
 </body>
 </html>

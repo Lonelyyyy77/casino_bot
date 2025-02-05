@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Инициализируем базу данных (в data.InitializeDB регистрируется подключение)
-	data.InitializeDB("./bot.db")
+	data.InitializeDB("bot/bot.db")
 
 	// Регистрируем все обработчики через пакет server,
 	// который сам регистрирует свои маршруты (например, для слотов, freespin, index и т.д.)
