@@ -31,43 +31,35 @@ async def inline_query_handler(query: types.InlineQuery):
 
     parts = text.split(maxsplit=2)
     if len(parts) < 2:
-        # Недостаточно данных (нет суммы или получателя)
         await query.answer([], cache_time=1)
         return
 
     amount_str = parts[0]
-    recipient_mention = parts[1]  # например "@SomeUser"
+    recipient_mention = parts[1]
     comment = parts[2] if len(parts) > 2 else ""
 
-    # Парсим сумму
     try:
         amount = int(amount_str)
     except ValueError:
         amount = 0
 
-    # Информация об отправителе (текущий пользователь)
     sender_id = query.from_user.id
     sender_username = query.from_user.username or "UnknownUser"
 
-    # Обрезаем "@" у получателя
     recipient_username = recipient_mention.lstrip("@")
     recipient_data = get_user_by_username(recipient_username)
 
-    # Тексты для карточки
     title = f"Отправить {amount} JPC"
     description = f"Получатель: {recipient_mention}, Комментарий: {comment}"
     message_text = f"Попытка перевода {amount} JPC => {recipient_mention}\n{comment}"
 
     if not recipient_data:
-        # Если пользователя не нашли, в демо-режиме покажем заглушку
         title = "Ошибка: получатель не найден"
         description = "Проверьте @username"
 
-    # Формируем callback_data. Храним ID получателя, чтобы точно знать, кто может "забрать" монеты.
     recipient_id = recipient_data["telegram_id"] if recipient_data else 0
     callback_data = f"inline_trade:{sender_id}:{recipient_id}:{amount}:{comment}"
 
-    # Инлайн-клавиатура
     kb_builder = InlineKeyboardBuilder()
     kb_builder.button(
         text="Получить",
@@ -75,7 +67,6 @@ async def inline_query_handler(query: types.InlineQuery):
     )
     kb = kb_builder.as_markup()
 
-    # Создаём результат инлайн-запроса
     result = InlineQueryResultArticle(
         id="transfer_coins",
         title=title,
@@ -83,10 +74,9 @@ async def inline_query_handler(query: types.InlineQuery):
         input_message_content=InputTextMessageContent(
             message_text=message_text
         ),
-        reply_markup=kb  # прикрепляем кнопку
+        reply_markup=kb
     )
 
-    # Возвращаем одну карточку
     await query.answer([result], cache_time=1)
 
 
@@ -100,7 +90,6 @@ async def callback_handler(call: types.CallbackQuery):
 
     _, sender_str, recipient_str, amount_str, comment = parts
 
-    # Парсим все числа
     try:
         sender_id = int(sender_str)
         recipient_id = int(recipient_str)
@@ -109,39 +98,31 @@ async def callback_handler(call: types.CallbackQuery):
         await call.answer("Некорректные параметры.", show_alert=True)
         return
 
-    # Проверяем, что нажал именно тот пользователь, которому предназначен перевод
     if call.from_user.id != recipient_id:
         await call.answer("Вы не тот пользователь, кому предназначен перевод!", show_alert=True)
         return
 
-    # Проверяем баланс отправителя
     sender_balance = get_user_balance(sender_id)
     if sender_balance < amount:
         await call.answer("У отправителя уже недостаточно средств!", show_alert=True)
         return
 
-    # Всё ок — выполняем перевод
     update_user_balance(sender_id, -amount)
     update_user_balance(recipient_id, amount)
 
-    # Отвечаем пользователю (alert)
     await call.answer("Монеты зачислены!", show_alert=True)
 
-    # *! Получаем информацию об отправителе, чтобы вставить его имя/юзернейм
     try:
         sender_chat = await bot.get_chat(sender_id)
-        # Если нет username — используем full_name или на крайний случай сам sender_id
         sender_username = sender_chat.username or sender_chat.full_name or str(sender_id)
     except Exception:
         sender_username = str(sender_id)
 
-    # *! Пишем получателю, от кого и сколько пришло
     await bot.send_message(
         recipient_id,
         f"Вам было зачислено {amount} JPC от @{sender_username}."
     )
 
-    # --- Редактируем старое сообщение, чтобы кнопку нельзя было нажать повторно ---
     new_text = (
         f"@{call.from_user.username or call.from_user.id} получил {amount} JPC.\n"
         f"Комментарий: {comment}\n"
@@ -159,7 +140,6 @@ async def callback_handler(call: types.CallbackQuery):
         except Exception as e:
             logging.warning(f"Не удалось изменить inline-сообщение: {e}")
 
-    # Уведомим отправителя, что перевод принят
     try:
         await bot.send_message(sender_id, f"Получатель {recipient_id} подтвердил перевод {amount} JPC.")
     except Exception as e:

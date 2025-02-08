@@ -12,3 +12,7 @@ class TransferState(StatesGroup):
 
 class WithdrawStates(StatesGroup):
     waiting_for_amount = State()
+
+
+class BetState(StatesGroup):
+    waiting_for_bet = State()

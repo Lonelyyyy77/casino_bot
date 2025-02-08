@@ -328,6 +328,9 @@ async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
     Если через 5 минут (60 циклов по 5 секунд) инвойс так и не будет оплачен,
     пользователю отправляется сообщение об истечении времени.
     """
+    channel_id = -1002453573888  # Канал для логирования
+    username = (await bot.get_chat(user_id)).username or f"ID: {user_id}"  # Получаем юзернейм
+
     for _ in range(60):
         await asyncio.sleep(5)
         try:
@@ -351,6 +354,7 @@ async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
 
                 update_user_balance(user_id, jpc_amount)
 
+                # Проверяем наличие реферального бонуса
                 async with db_lock:
                     conn = sqlite3.connect(DB_NAME)
                     cursor = conn.cursor()
@@ -378,17 +382,33 @@ async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
                             (referral_reward, referral_reward, referrer_id)
                         )
                         await bot.send_message(referrer_id,
-                                               f'Ваш рефнутый пользователь пополнил баланс, вы получили {referral_reward}JPC на ваш баланс!')
+                                               f'Ваш реферальный пользователь пополнил баланс, вы получили {referral_reward:.2f} JPC!')
                         conn.commit()
                     conn.close()
 
                 await bot.send_message(user_id, f"✅ Ваш баланс пополнен на {jpc_amount} JPC!")
+                log_message = (f"💰 *Пополнение баланса!*\n"
+                               f"👤 Игрок: @{username}\n"
+                               f"💳 Сумма: {jpc_amount:.2f} JPC\n"
+                               f"🆔 Invoice ID: `{invoice_id}`\n"
+                               f"✅ Статус: Успешно")
+
+                await bot.send_message(channel_id, log_message)
                 return
 
         except Exception as e:
             logging.error(f"Ошибка при проверке оплаты: {e}")
 
+    # Если оплата не прошла за 5 минут
     await bot.send_message(user_id, "❌ Время оплаты истекло.")
+
+    # Логируем неудачную оплату в канал
+    log_message = (f"⚠️ *Оплата не завершена!*\n"
+                   f"👤 Игрок: @{username}\n"
+                   f"💳 Сумма: {jpc_amount:.2f} JPC\n"
+                   f"🆔 Invoice ID: `{invoice_id}`\n"
+                   f"❌ Статус: Время истекло")
+    await bot.send_message(channel_id, log_message, parse_mode="Markdown")
 
 
 @crypto.pay_handler()
@@ -448,7 +468,22 @@ async def invoice_paid(update: Update, app: web.Application):
 
     update_user_balance(user_id, jpc_amount)
 
+    # Получаем имя пользователя
+    user_data = await bot.get_chat(user_id)
+    username = user_data.username or f"ID: {user_id}"
+
+    channel_id = -1002453573888
+    log_message = (f"💰 *Пополнение баланса!*\n"
+                   f"👤 Игрок: @{username}\n"
+                   f"💳 Сумма: {paid_amount} {asset}\n"
+                   f"🆔 Invoice ID: `{invoice_id}`\n"
+                   f"✅ Статус: Успешно")
+
+    await bot.send_message(channel_id, log_message)
+
+    # Отправляем уведомление пользователю
     await bot.send_message(user_id, f"✅ Ваш баланс пополнен на {paid_amount} {asset}!")
+
     logging.info(f"[CryptoBot] Пользователю {user_id} начислено {jpc_amount} JPC. invoice_id={invoice_id}")
 
 
