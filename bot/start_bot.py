@@ -19,10 +19,10 @@ dotenv.load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-# crypto_bot_token = CRYPTO_TOKEN === MAIN
-# tg_bot_token = TOKEN === MAIN
-crypto_bot_token = "29356:AA36F3AhgaMUhREyWErSNOsgN0CUEinNduh"
-tg_bot_token = "6680111108:AAFPO3QE4vokIaCADVJTAOEKsvUQVKNSod8" # TEST
+crypto_bot_token = CRYPTO_TOKEN #=== MAIN
+tg_bot_token = TOKEN #=== MAIN
+# crypto_bot_token = "29356:AA36F3AhgaMUhREyWErSNOsgN0CUEinNduh"
+# tg_bot_token = "6680111108:AAFPO3QE4vokIaCADVJTAOEKsvUQVKNSod8" # TEST
 router = Router()
 
 bot = Bot(token=tg_bot_token)
