@@ -28,7 +28,7 @@ router = Router()
 bot = Bot(token=tg_bot_token)
 
 crypto = AioCryptoPay(
-    token=CRYPTO_TOKEN,
+    token=crypto_bot_token,
     network=Networks.TEST_NET  # либо TEST_NET, если вы тестируете
 )
 
