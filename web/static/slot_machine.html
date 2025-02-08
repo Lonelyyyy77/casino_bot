@@ -1,110 +1,364 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shark Win Slots</title>
-    <link rel="stylesheet" href="/static/css/slot_machine.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            background-color: #0a0d17;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .stats-card {
+            background: #1c1f2e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .slot-machine {
+            background: #1c1f2e;
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .reels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .reel {
+            background: #2a2d3a;
+            border-radius: 8px;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .reel-container {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #2a2d3a;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .top-players {
+            background: #1c1f2e;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .top-players h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        .fs-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .fs-button {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Shark Win Slots</h1>
-        <div class="info">
-            <p>Баланс: <span id="balance"><h2>{{ printf "%.2f" .Balance }} JPC</h2></span> USDT</p>
-            <p>Free Spins: <span id="freespins">{{.FreeSpins}}</span></p>
-            <p>Прогрессивный Джекпот: <span id="jackpot">{{ printf "%.2f" .Jackpot }}</span> USDT</p>
+        <h1 class="title">Shark Win Slots</h1>
+        
+        <div class="stats-card">
+            <div class="stat-item">Баланс: <span id="balance">{{printf "%.2f" .Balance}}</span> JPC USDT</div>
+            <div class="stat-item">Free Spins: <span id="freeSpins">{{.FreeSpins}}</span></div>
+            <div class="stat-item">Прогрессивный Джекпот: <span id="jackpot">{{printf "%.2f" .Jackpot}}</span> USDT</div>
         </div>
-        <div class="game">
-            <div class="reels" id="reels">
-                <div class="reel">?</div>
-                <div class="reel">?</div>
-                <div class="reel">?</div>
+
+        <div class="slot-machine">
+            <div class="reels">
+                <div class="reel"><div class="reel-container">❓</div></div>
+                <div class="reel"><div class="reel-container">❓</div></div>
+                <div class="reel"><div class="reel-container">❓</div></div>
             </div>
+
             <div class="controls">
-                <input type="number" id="bet" placeholder="Введите ставку (0.1-30)" min="0.1" max="30" step="0.1">
-                <label>
-                    <input type="checkbox" id="fs_mode"> Режим FreeSpin
-                </label>
-                <button id="spin">Вращать</button>
+                <input type="number" id="betAmount" min="0.1" max="30" step="0.1" value="0.1" placeholder="Введите ставку (0.1-30)">
+                <button id="spinButton">Вращать</button>
+                <button id="freespinButton">Freespin</button>
+                <div class="fs-controls" style="display: none;">
+                    <button class="fs-button" data-fs="1">1 FS</button>
+                    <button class="fs-button" data-fs="10">10 FS</button>
+                    <button class="fs-button" data-fs="30">30 FS</button>
+                </div>
             </div>
-            <div id="result"></div>
         </div>
+
         <div class="top-players">
             <h2>Топ-10 игроков</h2>
-            <ul id="top-list"></ul>
+            <div id="topPlayersList"></div>
         </div>
-        <!-- Скрытый элемент для передачи telegram_id -->
-        <div id="telegram-id" style="display:none;">{{.TelegramID}}</div>
     </div>
 
-    <!-- Блок выбора фриспинов -->
-<div class="free-spins">
-    <p>Фриспины: <span id="fs-counter">{{.FreeSpins}}</span></p>
-    <div class="fs-buttons">
-      <button class="fs-btn" data-fs="1">Использовать 1 FS</button>
-      <button class="fs-btn" data-fs="10">Использовать 10 FS</button>
-      <button class="fs-btn" data-fs="30">Использовать 30 FS</button>
-    </div>
-    <p id="fs-visual-chance">Дополнительный шанс: 0%</p>
-  </div>
+    <div class="win-message" id="winMessage"></div>
 
     <script>
-        const telegramID = document.getElementById("telegram-id").textContent;
+        const telegramId = "{{.TelegramID}}";
+        let isSpinning = false;
+        let currentMode = "normal";
+        let selectedFSCount = 0;
 
-async function fetchTopPlayers() {
-    const res = await fetch("/slots/top");
-    const players = await res.json();
-    const list = document.getElementById("top-list");
-    list.innerHTML = "";
-    players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = `${player.username}: ${player.total_win.toFixed(2)} USDT`;
-        list.appendChild(li);
-    });
-}
+        async function spin() {
+            if (isSpinning) return;
+            
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            
+            if (currentMode === "normal" && (betAmount < 0.1 || betAmount > 30)) {
+                alert('Ставка должна быть от 0.1 до 30 USDT');
+                return;
+            }
 
-async function playGame() {
-    const betInput = document.getElementById("bet");
-    const bet = parseFloat(betInput.value);
-    if (isNaN(bet) || bet < 0.1 || bet > 30) {
-        alert("Введите корректную ставку (0.1-30)");
-        return;
-    }
-    const fsMode = document.getElementById("fs_mode").checked;
-    const response = await fetch("/slots/play", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegram_id: telegramID, bet: bet, mode: fsMode ? "fs" : "normal" })
-    });
-    const data = await response.json();
-    document.getElementById("balance").textContent = data.new_balance.toFixed(2);
-    document.getElementById("freespins").textContent = data.free_spins;
-    const reelsDiv = document.getElementById("reels");
-    reelsDiv.innerHTML = "";
-    data.reels.forEach(symbol => {
-        const reelDiv = document.createElement("div");
-        reelDiv.className = "reel";
-        reelDiv.textContent = symbol;
-        reelsDiv.appendChild(reelDiv);
-    });
-    let resultText = "";
-    if (data.message === "loss") {
-        resultText = `Вы проиграли ставку ${bet} JPC.`;
-    } else if (data.message === "freespin") {
-        resultText = `Вы выиграли повтороный спин! Теперь у вас ${data.free_spins} бесплатных вращений.`;
-    } else if (data.message === "jackpot") {
-        resultText = `Джекпот! Вы выиграли ${data.win_amount.toFixed(2)} JPC. ${data.jackpot_text}`;
-    } else {
-        resultText = `Вы выиграли ${data.win_amount.toFixed(2)} JPC (тип: ${data.message}).`;
-    }
-    document.getElementById("result").textContent = resultText;
-    fetchTopPlayers();
-}
+            isSpinning = true;
+            document.getElementById('spinButton').disabled = true;
+            document.getElementById('freespinButton').disabled = true;
 
-document.getElementById("spin").addEventListener("click", playGame);
-fetchTopPlayers();
+            try {
+                const response = await fetch('/slots/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        telegram_id: telegramId,
+                        bet: betAmount,
+                        mode: currentMode,
+                        fsCount: selectedFSCount,
+                        visualChance: Math.floor(Math.random() * 5) + 1
+                    })
+                });
 
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                
+                // Animate reels
+                const reels = document.querySelectorAll('.reel-container');
+                const symbols = result.reels;
+                
+                reels.forEach((reel, index) => {
+                    // Create animation effect
+                    const symbolsToShow = ['🐬', '🐟', '🐙', '💎', '🌊'];
+                    let currentPos = 0;
+                    
+                    const interval = setInterval(() => {
+                        reel.textContent = symbolsToShow[currentPos];
+                        currentPos = (currentPos + 1) % symbolsToShow.length;
+                    }, 100);
+
+                    // Stop animation after delay
+                    setTimeout(() => {
+                        clearInterval(interval);
+                        reel.textContent = symbols[index];
+                        
+                        // If this is the last reel, show results
+                        if (index === 2) {
+                            showResults(result);
+                        }
+                    }, 1000 + (index * 500));
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка при вращении');
+            } finally {
+                setTimeout(() => {
+                    isSpinning = false;
+                    document.getElementById('spinButton').disabled = false;
+                    document.getElementById('freespinButton').disabled = false;
+                }, 2500);
+            }
+        }
+
+        function showResults(result) {
+            const winMessage = document.getElementById('winMessage');
+            let message = '';
+
+            switch(result.message) {
+                case 'jackpot':
+                    message = `🎉 ДЖЕКПОТ! Выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    break;
+                case 'normal_win':
+                    message = `🎉 Выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    break;
+                case 'micro_win':
+                    message = `✨ Маленький выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    break;
+                case 'extra_spins':
+                    message = '🎁 Вы выиграли Free Spin!';
+                    break;
+                default:
+                    if (result.visualChanceText) {
+                        message = result.visualChanceText;
+                    }
+            }
+
+            if (message) {
+                winMessage.textContent = message;
+                winMessage.style.display = 'block';
+                setTimeout(() => {
+                    winMessage.style.display = 'none';
+                }, 3000);
+            }
+
+            // Update balance and free spins after showing the result
+            document.getElementById('balance').textContent = result.new_balance.toFixed(2);
+            document.getElementById('freeSpins').textContent = result.free_spins;
+            
+            // Update jackpot if needed
+            if (result.jackpot_text) {
+                document.getElementById('jackpot').textContent = '0.00';
+            }
+        }
+
+        async function updateTopPlayers() {
+            try {
+                const response = await fetch('/slots/top');
+                const players = await response.json();
+                
+                const list = document.getElementById('topPlayersList');
+                list.innerHTML = players.map(player => `
+                    <div class="player-item">
+                        <span>${player.username}</span>
+                        <span>${player.total_win.toFixed(2)} USDT</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error updating top players:', error);
+            }
+        }
+
+        document.getElementById('spinButton').addEventListener('click', () => {
+            currentMode = "normal";
+            spin();
+        });
+
+        document.getElementById('freespinButton').addEventListener('click', () => {
+            const fsControls = document.querySelector('.fs-controls');
+            fsControls.style.display = fsControls.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        document.querySelectorAll('.fs-button').forEach(button => {
+            button.addEventListener('click', () => {
+                currentMode = "fs";
+                selectedFSCount = parseInt(button.dataset.fs);
+                spin();
+            });
+        });
+
+        // Update top players every 30 seconds
+        updateTopPlayers();
+        setInterval(updateTopPlayers, 30000);
     </script>
-    <script src="/static/js/slot_machine.js"></script>
 </body>
 </html>

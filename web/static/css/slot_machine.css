@@ -1,229 +1,157 @@
-/* Сброс стандартных стилей */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Основной фон и базовые стили */
 body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #0a0f24, #1c2233);
-    color: #f0f0f0;
-    line-height: 1.5;
-    padding: 10px;
-}
-
-/* Контейнер приложения */
-.container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 15px;
-}
-
-/* Заголовок */
-h1 {
-    font-size: 2rem;
-    text-align: center;
-    margin-bottom: 20px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-}
-
-/* Информационный блок */
-.info {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-.info p {
-    font-size: 1.1rem;
-    margin: 5px 0;
-}
-
-/* Игровой блок */
-.game {
-    background: rgba(0, 0, 0, 0.5);
+    background-color: #0a0d17;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    min-height: 100vh;
     padding: 20px;
-    border: 2px solid #d4af37; /* золотая рамка */
-    border-radius: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* Блок с барабанами */
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.stats-card {
+    background: #1c1f2e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.slot-machine {
+    background: #1c1f2e;
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
 .reels {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     margin-bottom: 20px;
 }
 
 .reel {
-    flex: 1;
-    margin: 0 5px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 2px solid #f0f0f0;
-    border-radius: 12px;
-    height: 90px;
+    background: #2a2d3a;
+    border-radius: 8px;
+    aspect-ratio: 4/3;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    transition: transform 0.3s;
+    font-size: 2rem;
+    overflow: hidden;
 }
 
-.reel:hover {
-    transform: scale(1.05);
+.reel-container {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Элементы управления */
 .controls {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 15px;
 }
 
-.controls input[type="number"] {
-    width: 90%;
+input[type="number"] {
+    width: 100%;
     padding: 12px;
-    font-size: 1.1rem;
     border: none;
     border-radius: 8px;
-    text-align: center;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-}
-
-.controls input[type="number"]::placeholder {
-    color: rgba(255,255,255,0.8);
-}
-
-.controls label {
+    background: #2a2d3a;
+    color: white;
     font-size: 1rem;
+    text-align: center;
+}
+
+.checkbox-wrapper {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
-.controls button {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #fff;
-    border: none;
-    padding: 14px 24px;
-    font-size: 1.1rem;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-    width: 90%;
-    max-width: 320px;
-}
-
-.controls button:active {
-    transform: scale(0.98);
-}
-
-.controls button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
-}
-
-/* Результат игры */
-#result {
-    text-align: center;
-    font-size: 1.1rem;
-    margin-top: 15px;
-    padding: 10px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 8px;
-}
-
-/* Блок топ-игроков */
-.top-players {
-    background: rgba(255, 255, 255, 0.1);
+button {
+    width: 100%;
     padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+button:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+}
+
+.top-players {
+    background: #1c1f2e;
     border-radius: 12px;
-    margin-top: 25px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    padding: 20px;
 }
 
 .top-players h2 {
+    text-align: center;
+    margin-bottom: 15px;
     font-size: 1.5rem;
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2d3a;
+}
+
+.win-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 12px;
     text-align: center;
-    margin-bottom: 12px;
+    display: none;
+    z-index: 100;
 }
 
-.top-players ul {
-    list-style: none;
-    padding: 0;
-}
-
-.top-players li {
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding: 10px 0;
-    font-size: 1rem;
-}
-
-/* Медиазапрос для экранов до 480px (мобильные устройства) */
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.8rem;
-    }
-    
-    .info p, .top-players li {
-        font-size: 0.95rem;
-    }
-    
-    .reel {
-        height: 70px;
-        font-size: 2rem;
-    }
-    
-    .controls input[type="number"] {
-        padding: 10px;
-        font-size: 1rem;
-    }
-    
-    .controls button {
-        padding: 12px 20px;
-        font-size: 1rem;
-    }
-}
-
-.free-spins {
-    margin: 20px auto;
-    text-align: center;
-    color: #f0f0f0;
-}
-
-.fs-buttons {
+.fs-controls {
+    display: flex;
+    gap: 10px;
     margin-top: 10px;
 }
 
-.fs-btn {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    margin: 0 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.2s;
-}
-
-.fs-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
-}
-
-#fs-visual-chance {
-    margin-top: 8px;
+.fs-button {
+    flex: 1;
+    padding: 10px;
     font-size: 0.9rem;
 }
-

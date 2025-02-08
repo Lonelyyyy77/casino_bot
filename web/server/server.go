@@ -129,7 +129,8 @@ func ServeFreeSpin(w http.ResponseWriter, r *http.Request) {
 func StartServer() {
 
 	// Обработка статических файлов
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+	// В функции StartServer измените путь для статических файлов:
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
 	http.HandleFunc("/", ServeIndex)
 
