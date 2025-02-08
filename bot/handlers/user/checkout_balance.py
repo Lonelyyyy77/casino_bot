@@ -95,7 +95,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Недостаточно средств (Баланс: {balance:.2f} USDT)")
-        await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+        await callback.bot.send_message(channel_id, log_message)
         return
 
     # Обновляем баланс
@@ -115,7 +115,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Ошибка при создании чека")
-        await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+        await callback.bot.send_message(channel_id, log_message)
         return
 
     # Извлекаем ссылку на чек
@@ -146,7 +146,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
                    f"👤 Игрок: @{username}\n"
                    f"💰 Сумма: {amount:.2f} USDT\n"
                    f"🔗 [Ссылка на чек]({link})")
-    await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+    await callback.bot.send_message(channel_id, log_message)
 
     # Удаляем сообщение через 15 секунд
     await asyncio.sleep(15)
@@ -192,7 +192,7 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Недостаточно средств (Баланс: {balance:.2f} USDT)")
-        await message.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+        await message.bot.send_message(channel_id, log_message)
         return
 
     # Обновляем баланс
@@ -213,7 +213,7 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Ошибка при создании чека")
-        await message.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+        await message.bot.send_message(channel_id, log_message)
         return
 
     # Извлекаем ссылку на чек
