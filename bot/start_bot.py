@@ -5,6 +5,7 @@ import os
 from aiocryptopay import AioCryptoPay, Networks
 from aiogram import Bot, Dispatcher, Router
 
+from bot.config import CRYPTO_TOKEN, TOKEN
 from bot.database import initialize_database, DB_NAME
 from bot.database.admin.admin import add_admin
 from bot.handlers.routers.routers import user_routers, admin_routers, start_router
@@ -18,11 +19,11 @@ dotenv.load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-CRYPTO_TOKEN = os.getenv('CRYPTO_TOKEN')
-TOKEN = os.getenv('TOKEN')
+crypto_bot_token = CRYPTO_TOKEN
+tg_bot_token = TOKEN
 router = Router()
 
-bot = Bot(token=TOKEN)
+bot = Bot(token=tg_bot_token)
 
 crypto = AioCryptoPay(
     token=CRYPTO_TOKEN,

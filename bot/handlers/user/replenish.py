@@ -12,11 +12,11 @@ from aiocryptopay.models.update import Update
 
 from bot.database import DB_NAME
 from bot.database.user.user import update_user_balance
-from bot.start_bot import bot, CRYPTO_TOKEN
+from bot.start_bot import bot, crypto_bot_token
 from bot.states.user.user import PaymentState
 
 crypto = AioCryptoPay(
-    token=CRYPTO_TOKEN,
+    token=crypto_bot_token,
     network=Networks.TEST_NET  # TEST_NET для тестирования
 )
 web_app = web.Application()
