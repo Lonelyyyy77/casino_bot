@@ -1,744 +1,749 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shark Win Slots</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shark Win Slots</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
 
-        body {
-            background: url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/back-wTGaYzvEYyfpE5MvwY5Rf73i6dSbFY.png') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            overflow: hidden;
-        }
+    body {
+      background: url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/back-wTGaYzvEYyfpE5MvwY5Rf73i6dSbFY.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow: hidden;
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            margin-bottom: 10px;
-        }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      margin-bottom: 10px;
+    }
 
-        .back-button {
-            font-size: 24px;
-            color: white;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-        }
+    .back-button {
+      font-size: 24px;
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+    }
 
-        .balance-display {
-            text-align: center;
-        }
+    .balance-display {
+      text-align: center;
+    }
 
-        .balance-label {
-            font-size: 14px;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-            letter-spacing: 1px;
-        }
+    .balance-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      letter-spacing: 1px;
+    }
 
-        .balance-amount {
-            font-size: 24px;
-            font-weight: bold;
-        }
+    .balance-amount {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-        .leaderboard-icon {
-            font-size: 24px;
-            padding: 5px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
+    .leaderboard-icon {
+      font-size: 24px;
+      padding: 5px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
 
-        .leaderboard-icon:hover {
-            transform: scale(1.1);
-        }
+    .leaderboard-icon:hover {
+      transform: scale(1.1);
+    }
 
-        .slot-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px;
-            margin: 0 auto;
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 10px;
-            backdrop-filter: blur(15px); /* Размытие фона */
-            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
-        }
+    .slot-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 10px;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 10px;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
 
-        .slots {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
 
-        .slot {
-            background: rgb(255, 255, 255);
-            border-radius: 10px;
-            aspect-ratio: 1/1.5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+    .slot {
+      background: rgb(255, 255, 255);
+      border-radius: 10px;
+      aspect-ratio: 1/1.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .reel-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 300%;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.1s linear;
-            backdrop-filter: blur(15px); /* Размытие фона */
-            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
-        }
+    .reel-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 300%;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.1s linear;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
 
-        .reel-item {
-            width: 100%;
-            height: 33.33%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-        }
+    .reel-item {
+      width: 100%;
+      height: 33.33%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+    }
 
-        .slot-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, 
-                rgba(255,255,255,0.9) 0%, 
-                rgba(255,255,255,0) 20%, 
-                rgba(255,255,255,0) 80%, 
-                rgba(255,255,255,0.9) 100%);
-            pointer-events: none;
-            z-index: 2;
-        }
+    .slot-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.9) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
 
-        .bet-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px;
-            margin: 5px auto;
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .bet-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 10px;
+      margin: 5px auto;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .bet-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 8px 15px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .bet-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 8px 15px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-        .bet-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+    .bet-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
-        .bet-display {
-            font-size: 18px;
-            font-weight: bold;
-        }
+    .bet-display {
+      font-size: 18px;
+      font-weight: bold;
+    }
 
-        .result-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px;
-            margin: 5px auto;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
+    .result-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 10px;
+      margin: 5px auto;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
 
-        .result-text {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
+    .result-text {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
 
-        .jackpot-progress {
-            font-size: 12px;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    .jackpot-progress {
+      font-size: 12px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgb(255, 196, 57);
+      text-shadow: 0 0 4px rgb(255, 200, 10), 0 0 8px rgba(255,168,46,0.755), 0 0 12px rgba(255,166,42,0.664), 0 0 16px rgba(255,166,41,0.441), 0 0 20px rgba(255,158,23,0.319);
+    }
 
-        .freespins-counter {
-            text-align: center;
-            font-size: 16px;
-            margin: 5px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    .freespins-counter {
+      text-align: center;
+      font-size: 16px;
+      margin: 5px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            margin: 10px auto;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 20px;
-        }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 10px auto;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 20px;
+    }
 
-        .game-button {
-            padding: 15px;
-            font-size: 20px;
-            border: none;
-            border-radius: 25px;
-            background: #4a90e2;
-            color: white;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-            transition: background-color 0.3s, transform 0.3s;
-        }
+    .game-button {
+      padding: 15px;
+      font-size: 20px;
+      border: none;
+      border-radius: 25px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background-color 0.3s, transform 0.3s;
+    }
 
-        .game-button:hover {
-            background: #3a7bc8;
-            transform: translateY(-2px);
-        }
+    .game-button:hover {
+      background: #3a7bc8;
+      transform: translateY(-2px);
+    }
 
-        .game-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
+    .game-button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-        .fs-controls {
-            display: none;
-            gap: 10px;
-            margin-top: 10px;
-        }
+    /* Панель выбора фриспинов с плавной анимацией */
+    .fs-controls {
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    .fs-controls.open {
+      opacity: 1;
+      max-height: 100px; /* При необходимости подберите значение по контенту */
+    }
 
-        .fs-button {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-        }
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+    }
+    .modal {
+      background: rgba(27, 27, 27, 0.435);
+      border-radius: 20px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+    .modal-overlay.show .modal {
+      transform: translateY(0);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .leaderboard-table th {
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #a9d1ff;
+    }
+    .leaderboard-table tr:last-child td {
+      border-bottom: none;
+    }
 
-        /* Modal styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+    /* Bet input modal */
+    .bet-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      -webkit-backdrop-filter: blur(15px);
+    }
+    .bet-modal.show {
+      opacity: 1;
+    }
+    .bet-modal-content {
+      background: rgba(28, 31, 46, 0.9);
+      border-radius: 20px;
+      padding: 20px;
+      width: 90%;
+      max-width: 300px;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+    .bet-modal.show .bet-modal-content {
+      transform: translateY(0);
+    }
+    .bet-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 20px;
+      margin-bottom: 15px;
+      border: 2px solid #4a90e2;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      text-align: center;
+    }
+    .bet-confirm {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .bet-confirm:hover {
+      background: #3a7bc8;
+      transform: translateY(-2px);
+    }
 
-        .modal-overlay.show {
-            opacity: 1;
-        }
+    .reel-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-size: 60px;
+      color: black;
+    }
 
-        .modal {
-            background: rgba(28, 31, 46, 0.9);
-            border-radius: 20px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
+    /* Анимация для обновления jackpot */
+    @keyframes glowWave {
+      0% {
+        text-shadow: 0 0 4px rgb(255,202,57), 0 0 8px rgba(255,168,46,0.755);
+      }
+      50% {
+        text-shadow: 0 0 12px rgb(255,202,57), 0 0 16px rgba(255,168,46,0.9);
+      }
+      100% {
+        text-shadow: 0 0 4px rgb(255,202,57), 0 0 8px rgba(255,168,46,0.755);
+      }
+    }
+    /* Привязываем анимацию к элементу jackpot */
+    #jackpot.animate {
+      animation: glowWave 1s ease-in-out;
+    }
 
-        .modal-overlay.show .modal {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .leaderboard-table th,
-        .leaderboard-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .leaderboard-table th {
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #a9d1ff;
-        }
-
-        .leaderboard-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Bet input modal */
-        .bet-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(15px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(15px); /* Размытие фона */
-            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
-
-
-        }
-
-        .bet-modal.show {
-            opacity: 1;
-        }
-
-        .bet-modal-content {
-            background: rgba(28, 31, 46, 0.9);
-            border-radius: 20px;
-            padding: 20px;
-            width: 90%;
-            max-width: 300px;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .bet-modal.show .bet-modal-content {
-            transform: translateY(0);
-        }
-
-        .bet-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 20px;
-            margin-bottom: 15px;
-            border: 2px solid #4a90e2;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            text-align: center;
-        }
-
-        .bet-confirm {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            background: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .bet-confirm:hover {
-            background: #3a7bc8;
-            transform: translateY(-2px);
-        }
-
-        @keyframes shake {
-            0% { transform: translateY(0); }
-            25% { transform: translateY(-5px); }
-            50% { transform: translateY(5px); }
-            75% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
-        }
-
-        .shaking {
-            animation: shake 0.5s ease-in-out;
-        }
-    </style>
+    @keyframes shake {
+      0% { transform: translateY(0); }
+      25% { transform: translateY(-5px); }
+      50% { transform: translateY(5px); }
+      75% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+    .shaking {
+      animation: shake 4s ease-in-out;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <button class="back-button">←</button>
-        <div class="balance-display">
-            <div class="balance-label">B A L A N C E</div>
-            <div class="balance-amount"><span id="balance">{{printf "%.2f" .Balance}}</span> JPC</div>
+  <div class="header">
+    <button class="back-button">←</button>
+    <div class="balance-display">
+      <div class="balance-label">B A L A N C E</div>
+      <div class="balance-amount"><span id="balance">{{printf "%.2f" .Balance}}</span> JPC</div>
+    </div>
+    <div class="leaderboard-icon">👑</div>
+  </div>
+
+  <div class="slot-container">
+    <div class="slots">
+      <div class="slot">
+        <div class="reel-container" id="reel1">
+          <!-- Will be filled by JavaScript -->
         </div>
-        <div class="leaderboard-icon">👑</div>
-    </div>
-
-    <div class="slot-container">
-        <div class="slots">
-            <div class="slot">
-                <div class="reel-container" id="reel1">
-                    <!-- Will be filled by JavaScript -->
-                </div>
-                <div class="slot-overlay"></div>
-            </div>
-            <div class="slot">
-                <div class="reel-container" id="reel2">
-                    <!-- Will be filled by JavaScript -->
-                </div>
-                <div class="slot-overlay"></div>
-            </div>
-            <div class="slot">
-                <div class="reel-container" id="reel3">
-                    <!-- Will be filled by JavaScript -->
-                </div>
-                <div class="slot-overlay"></div>
-            </div>
+        <div class="slot-overlay"></div>
+      </div>
+      <div class="slot">
+        <div class="reel-container" id="reel2">
+          <!-- Will be filled by JavaScript -->
         </div>
-    </div>
-
-    <div class="bet-container">
-        <button id="decreaseBet" class="bet-button">-</button>
-        <span class="bet-display">Ставка: <span id="betDisplay">0.1</span> JPC</span>
-        <button id="increaseBet" class="bet-button">+</button>
-    </div>
-
-    <div class="result-container">
-        <div class="result-text" id="resultText">Win Shark 🦈</div>
-        <div class="jackpot-progress">JACKPOT PROGRESS: <span id="jackpot">{{printf "%.2f" .Jackpot}}</span> JPC</div>
-    </div>
-
-    <div class="freespins-counter">
-        FREESPINS: <span id="freeSpins">{{.FreeSpins}}</span> FS
-    </div>
-
-    <div class="button-container">
-        <button id="spinButton" class="game-button">ВРАЩАТЬ</button>
-        <button id="freespinButton" class="game-button">FREESPIN</button>
-        <div class="fs-controls">
-            <button class="game-button fs-button" data-fs="1">1 FS</button>
-            <button class="game-button fs-button" data-fs="10">10 FS</button>
-            <button class="game-button fs-button" data-fs="30">30 FS</button>
+        <div class="slot-overlay"></div>
+      </div>
+      <div class="slot">
+        <div class="reel-container" id="reel3">
+          <!-- Will be filled by JavaScript -->
         </div>
+        <div class="slot-overlay"></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Top Players Modal -->
-    <div class="modal-overlay" id="topPlayersModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">Топ-10 игроков</div>
-                <button class="close-modal">&times;</button>
-            </div>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Место</th>
-                        <th>Игрок</th>
-                        <th>Выигрыш</th>
-                    </tr>
-                </thead>
-                <tbody id="topPlayersList">
-                    <!-- Will be filled by JavaScript -->
-                </tbody>
-            </table>
-        </div>
+  <div class="bet-container">
+    <button id="decreaseBet" class="bet-button">-</button>
+    <span class="bet-display">Ставка: <span id="betDisplay">0.1</span> JPC</span>
+    <button id="increaseBet" class="bet-button">+</button>
+  </div>
+
+  <div class="result-container">
+    <div class="result-text" id="resultText">Win Shark 🦈</div>
+    <div class="jackpot-progress">JACKPOT PROGRESS: <span id="jackpot">{{printf "%.2f" .Jackpot}}</span> JPC </div>
+  </div>
+
+  <div class="freespins-counter">
+    FREESPINS: <span id="freeSpins">{{.FreeSpins}}</span> FS
+  </div>
+
+  <div class="button-container">
+    <button id="spinButton" class="game-button">ВРАЩАТЬ</button>
+    <button id="freespinButton" class="game-button">FREESPIN</button>
+    <div class="fs-controls">
+      <button class="game-button fs-button" data-fs="1">1 FS</button>
+      <button class="game-button fs-button" data-fs="10">10 FS</button>
+      <button class="game-button fs-button" data-fs="30">30 FS</button>
     </div>
+  </div>
 
-    <!-- Bet Input Modal -->
-    
-    <div class="bet-modal" id="betModal">
-        <div class="bet-modal-content">
-            <input type="number" id="betInput" class="bet-input" min="0.1" max="30" step="0.1" value="0.1">
-            <button id="confirmBet" class="bet-confirm">Подтвердить</button>
-        </div>
+  <!-- Top Players Modal -->
+  <div class="modal-overlay" id="topPlayersModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Топ-10 игроков</div>
+        <div class="modal-title">Win 🦈 Shark</div>
+        <button class="close-modal">&times;</button>
+      </div>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>ПОЛЬЗОВАТЕЛЬ</th>
+            <th>ВЫИГРЫШ</th>
+          </tr>
+        </thead>
+        <tbody id="topPlayersList">
+          <!-- Will be filled by JavaScript -->
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <script>
-        const telegramId = "{{.TelegramID}}";
-        let isSpinning = false;
-        let currentMode = "normal";
-        let selectedFSCount = 0;
-        let currentBet = 0.1;
+  <!-- Bet Input Modal -->
+  <div class="bet-modal" id="betModal">
+    <div class="bet-modal-content">
+      <input type="number" id="betInput" class="bet-input" min="0.1" max="30" step="0.1" value="0.1">
+      <button id="confirmBet" class="bet-confirm">Подтвердить</button>
+    </div>
+  </div>
 
-        const symbols = ['🐬', '🐟', '🐙', '💎', '🌊'];
-        const reelHeight = 100; // height of one symbol in percentage
+  <script>
+    const telegramId = "{{.TelegramID}}";
+    let isSpinning = false;
+    let currentMode = "normal";
+    let selectedFSCount = 0;
+    let currentBet = 0.1;
 
-        function createReelContent(reelId) {
-            const reel = document.getElementById(reelId);
-            reel.innerHTML = '';
-            
-            for (let i = 0; i < 3; i++) {
-                const div = document.createElement('div');
-                div.className = 'reel-item';
-                div.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                reel.appendChild(div);
-            }
-        }
+    const symbols = ['🐬', '🐟', '🐙', '💎', '🌊'];
+    const reelHeight = 100; // height of one symbol in percentage
 
-        function initReels() {
-            createReelContent('reel1');
-            createReelContent('reel2');
-            createReelContent('reel3');
-        }
+    function createReelContent(reelId) {
+      const reel = document.getElementById(reelId);
+      reel.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const div = document.createElement('div');
+        div.className = 'reel-item';
+        div.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        reel.appendChild(div);
+      }
+    }
 
-        function spinReel(reelId, finalSymbol, delay) {
-            return new Promise(resolve => {
-                const reel = document.getElementById(reelId);
-                const slot = reel.parentElement;
-                const spinDuration = 2750; // Total spin duration in ms
-                
-                slot.classList.add('shaking');
-                
-                let currentIndex = 0;
-                const intervalId = setInterval(() => {
-                    reel.children[0].textContent = symbols[currentIndex];
-                    reel.children[1].textContent = symbols[(currentIndex + 1) % symbols.length];
-                    reel.children[2].textContent = symbols[(currentIndex + 2) % symbols.length];
-                    currentIndex = (currentIndex + 1) % symbols.length;
-                }, 100);
+    function initReels() {
+      createReelContent('reel1');
+      createReelContent('reel2');
+      createReelContent('reel3');
+    }
 
-                setTimeout(() => {
-                    clearInterval(intervalId);
-                    reel.children[0].textContent = finalSymbol;
-                    reel.children[1].textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                    reel.children[2].textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                    slot.classList.remove('shaking');
-                    resolve();
-                }, spinDuration + delay * 700);
-            });
-        }
+    function spinReel(reelId, finalSymbol, delay) {
+      return new Promise(resolve => {
+        const reel = document.getElementById(reelId);
+        const slot = reel.parentElement;
+        const spinDuration = 2750; // Total spin duration in ms
+        slot.classList.add('shaking');
+        let currentIndex = 0;
+        const intervalId = setInterval(() => {
+          reel.children[0].textContent = symbols[currentIndex];
+          reel.children[1].textContent = symbols[(currentIndex + 1) % symbols.length];
+          reel.children[2].textContent = symbols[(currentIndex + 2) % symbols.length];
+          currentIndex = (currentIndex + 1) % symbols.length;
+        }, 100);
+        setTimeout(() => {
+          clearInterval(intervalId);
+          reel.children[0].textContent = finalSymbol;
+          reel.children[1].textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          reel.children[2].textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          slot.classList.remove('shaking');
+          resolve();
+        }, spinDuration + delay * 700);
+      });
+    }
 
-        async function spin() {
-            if (isSpinning) return;
-            
-            isSpinning = true;
-            document.getElementById('spinButton').disabled = true;
-            document.getElementById('freespinButton').disabled = true;
-
-            try {
-                const response = await fetch('/slots/play', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        telegram_id: telegramId,
-                        bet: currentBet,
-                        mode: currentMode,
-                        fsCount: selectedFSCount,
-                        visualChance: Math.floor(Math.random() * 5) + 1
-                    })
-                });
-
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const result = await response.json();
-                
-                await Promise.all([
-                    spinReel('reel1', result.reels[0], 0),
-                    spinReel('reel2', result.reels[1], 1),
-                    spinReel('reel3', result.reels[2], 2)
-                ]);
-                
-                showResults(result);
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Произошла ошибка при вращении! (' + error + ')');
-            } finally {
-                setTimeout(() => {
-                    isSpinning = false;
-                    document.getElementById('spinButton').disabled = false;
-                    document.getElementById('freespinButton').disabled = false;
-                }, 2);
-            }
-        }
-
-        function showResults(result) {
-            const resultText = document.getElementById('resultText');
-            
-            switch(result.message) {
-                case 'jackpot':
-                    resultText.textContent = `🤩 ДЖЕКПОТ! ${result.win_amount.toFixed(2)} JPC`;
-                    break;
-                case 'normal_win':
-                    resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
-                    break;
-                case 'micro_win':
-                    resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
-                    break;
-                case 'extra_spins':
-                    resultText.textContent = '🎰 ПОЛУЧЕНО 2 FS!';
-                    break;
-                default:
-                    if (result.visualChanceText) {
-                        resultText.textContent = result.visualChanceText;
-                    } else {
-                        resultText.textContent = 'ПРОИГРЫШ!';
-                    }
-            }
-
-            document.getElementById('balance').textContent = result.new_balance.toFixed(2);
-            document.getElementById('freeSpins').textContent = result.free_spins;
-            
-            if (result.jackpot_text) {
-                document.getElementById('jackpot').textContent = '0.00';
-            }
-        }
-
-        function showTopPlayersModal() {
-            const modal = document.getElementById('topPlayersModal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
-            updateTopPlayers();
-        }
-
-        function hideTopPlayersModal() {
-            const modal = document.getElementById('topPlayersModal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        async function updateTopPlayers() {
-            try {
-                const response = await fetch('/slots/top');
-                const players = await response.json();
-                
-                const list = document.getElementById('topPlayersList');
-                list.innerHTML = players.map((player, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${player.username}</td>
-                        <td>${player.total_win.toFixed(2)} JPC</td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error updating top players:', error);
-            }
-        }
-
-        function showBetModal() {
-            const modal = document.getElementById('betModal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-
-        function hideBetModal() {
-            const modal = document.getElementById('betModal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        function updateBetDisplay() {
-            document.getElementById('betDisplay').textContent = currentBet.toFixed(1);
-        }
-
-        document.querySelector('.leaderboard-icon').addEventListener('click', showTopPlayersModal);
-        document.querySelector('.close-modal').addEventListener('click', hideTopPlayersModal);
-        document.getElementById('topPlayersModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) hideTopPlayersModal();
+    async function spin() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spinButton').disabled = true;
+      document.getElementById('freespinButton').disabled = true;
+      try {
+        const response = await fetch('/slots/play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegram_id: telegramId,
+            bet: currentBet,
+            mode: currentMode,
+            fsCount: selectedFSCount,
+            visualChance: Math.floor(Math.random() * 5) + 1
+          })
         });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const result = await response.json();
+        await Promise.all([
+          spinReel('reel1', result.reels[0], 0),
+          spinReel('reel2', result.reels[1], 1),
+          spinReel('reel3', result.reels[2], 2)
+        ]);
+        showResults(result);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Произошла ошибка при вращении! (' + error + ')');
+      } finally {
+        setTimeout(() => {
+          isSpinning = false;
+          document.getElementById('spinButton').disabled = false;
+          document.getElementById('freespinButton').disabled = false;
+        }, 2);
+      }
+    }
 
-        document.getElementById('spinButton').addEventListener('click', () => {
-            currentMode = "normal";
-            spin();
-        });
+    function showResults(result) {
+      const resultText = document.getElementById('resultText');
+      switch(result.message) {
+        case 'jackpot':
+          resultText.textContent = `🤩 ДЖЕКПОТ! ${result.win_amount.toFixed(2)} JPC`;
+          break;
+        case 'normal_win':
+          resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
+          break;
+        case 'micro_win':
+          resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
+          break;
+        case 'extra_spins':
+          resultText.textContent = '🎰 ПОЛУЧЕНО 2 FS!';
+          break;
+        default:
+          resultText.textContent = result.visualChanceText || 'ПРОИГРЫШ!';
+      }
+      document.getElementById('balance').textContent = result.new_balance.toFixed(2);
+      document.getElementById('freeSpins').textContent = result.free_spins;
+      if (result.jackpot !== undefined) {
+        document.getElementById('jackpot').textContent = result.jackpot.toFixed(2);
+      }
+    }
 
-        document.getElementById('freespinButton').addEventListener('click', () => {
-            const fsControls = document.querySelector('.fs-controls');
-            fsControls.style.display = fsControls.style.display === 'none' ? 'flex' : 'none';
-        });
+    function showTopPlayersModal() {
+      const modal = document.getElementById('topPlayersModal');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('show'), 10);
+      updateTopPlayers();
+    }
 
-        document.querySelectorAll('.fs-button').forEach(button => {
-            button.addEventListener('click', () => {
-                currentMode = "fs";
-                selectedFSCount = parseInt(button.dataset.fs);
-                spin();
-            });
-        });
+    function hideTopPlayersModal() {
+      const modal = document.getElementById('topPlayersModal');
+      modal.classList.remove('show');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
 
-        document.querySelector('.back-button').addEventListener('click', () => {
-            window.history.back();
-        });
+    async function updateTopPlayers() {
+      try {
+        const response = await fetch('/slots/top');
+        const players = await response.json();
+        const list = document.getElementById('topPlayersList');
+        list.innerHTML = players.map((player, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${player.username}</td>
+            <td>${player.total_win.toFixed(2)} JPC</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error updating top players:', error);
+      }
+    }
 
-        document.getElementById('decreaseBet').addEventListener('click', () => {
-            if (currentBet > 0.1) {
-                currentBet = Math.max(0.1, currentBet - 0.1);
-                updateBetDisplay();
-            }
-        });
+    function showBetModal() {
+      const modal = document.getElementById('betModal');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('show'), 10);
+    }
 
-        document.getElementById('increaseBet').addEventListener('click', () => {
-            if (currentBet < 30) {
-                currentBet = Math.min(30, currentBet + 0.1);
-                updateBetDisplay();
-            }
-        });
+    function hideBetModal() {
+      const modal = document.getElementById('betModal');
+      modal.classList.remove('show');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
 
-        document.querySelector('.bet-display').addEventListener('click', showBetModal);
+    function updateBetDisplay() {
+      document.getElementById('betDisplay').textContent = currentBet.toFixed(1);
+    }
 
-        document.getElementById('confirmBet').addEventListener('click', () => {
-            const newBet = parseFloat(document.getElementById('betInput').value);
-            if (newBet >= 0.1 && newBet <= 30) {
-                currentBet = newBet;
-                updateBetDisplay();
-                hideBetModal();
-            } else {
-                alert('Ставка должна быть от 0.1 до 30 JPC');
-            }
-        });
+    document.querySelector('.leaderboard-icon').addEventListener('click', showTopPlayersModal);
+    document.querySelector('.close-modal').addEventListener('click', hideTopPlayersModal);
+    document.getElementById('topPlayersModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideTopPlayersModal();
+    });
 
-        document.getElementById('betModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) hideBetModal();
-        });
+    document.getElementById('spinButton').addEventListener('click', () => {
+      currentMode = "normal";
+      spin();
+    });
 
-        initReels();
+    // Обработчик для плавного открытия/закрытия панели выбора фриспинов
+    document.getElementById('freespinButton').addEventListener('click', () => {
+      const fsControls = document.querySelector('.fs-controls');
+      fsControls.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.fs-button').forEach(button => {
+      button.addEventListener('click', () => {
+        currentMode = "fs";
+        selectedFSCount = parseInt(button.dataset.fs);
+        spin();
+      });
+    });
+
+    document.querySelector('.back-button').addEventListener('click', () => {
+      window.history.back();
+    });
+
+    document.getElementById('decreaseBet').addEventListener('click', () => {
+      if (currentBet > 0.1) {
+        currentBet = Math.max(0.1, currentBet - 0.1);
         updateBetDisplay();
-    </script>
+      }
+    });
+
+    document.getElementById('increaseBet').addEventListener('click', () => {
+      if (currentBet < 30) {
+        currentBet = Math.min(30, currentBet + 0.1);
+        updateBetDisplay();
+      }
+    });
+
+    document.querySelector('.bet-display').addEventListener('click', showBetModal);
+
+    document.getElementById('confirmBet').addEventListener('click', () => {
+      const newBet = parseFloat(document.getElementById('betInput').value);
+      if (newBet >= 0.1 && newBet <= 30) {
+        currentBet = newBet;
+        updateBetDisplay();
+        hideBetModal();
+      } else {
+        alert('Ставка должна быть от 0.1 до 30 JPC');
+      }
+    });
+
+    document.getElementById('betModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideBetModal();
+    });
+
+    initReels();
+    updateBetDisplay();
+
+    // Функция обновления jackpot с плавной анимацией волны
+    function updateJackpot(newJackpot) {
+      const jackpotElem = document.getElementById('jackpot');
+      jackpotElem.textContent = newJackpot.toFixed(2);
+      jackpotElem.classList.remove('animate');
+      void jackpotElem.offsetWidth;
+      jackpotElem.classList.add('animate');
+      jackpotElem.addEventListener('animationend', () => {
+        jackpotElem.classList.remove('animate');
+      }, { once: true });
+    }
+
+    // Периодическое обновление jackpot каждые 3 секунды
+    setInterval(() => {
+      fetch('/slots/jackpot')
+        .then(response => response.json())
+        .then(data => {
+          updateJackpot(parseFloat(data.jackpot));
+        })
+        .catch(err => console.error('Ошибка при получении jackpot:', err));
+    }, 3000);
+  </script>
 </body>
 </html>

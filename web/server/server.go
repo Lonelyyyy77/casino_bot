@@ -143,6 +143,7 @@ func StartServer() {
 	http.HandleFunc("/slots/", sm.GamePageHandler)      // Страница игры: /slots/?telegram_id=...
 	http.HandleFunc("/slots/play", sm.Play)             // Endpoint для вращения
 	http.HandleFunc("/slots/top", sm.TopPlayersHandler) // Топ-10 игроков
+	http.HandleFunc("/slots/jackpot", sm.JackpotHandler)
 
 	fmt.Println("SlotMachine endpoints registered under /slots/")
 

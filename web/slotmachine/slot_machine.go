@@ -18,14 +18,33 @@ import (
 // Изначально 0.001%, при проигрыше увеличивается на 0.0005% и сбрасывается после джекпота.
 var jackpotChance float64 = 0.001
 
+// calcMultiplier рассчитывает коэффициент выигрыша (множитель) в зависимости от размера ставки.
+// Для ставок от 0.1 до 0.9 JPC: множитель растёт линейно от 1.1 (при ставке 0.1, то есть 110% от ставки)
+// до 1.4 (при ставке 0.9, то есть 140% от ставки).
+// Для ставок от 1 до 30 JPC: множитель растёт линейно от 1.035 (при ставке 1, то есть +3.5%)
+// до 1.333 (при ставке 30, то есть +33.3%).
+func calcMultiplier(bet float64) float64 {
+	if bet < 1.0 {
+		// Для ставок от 0.1 до 0.9: устанавливаем минимум 1.1 и максимум 1.4
+		// При bet = 0.1 -> multiplier = 1.1, при bet = 0.9 -> multiplier = 1.4
+		return 1.1 + ((bet - 0.1) * (0.3 / 0.8))
+	} else {
+		// Для ставок от 1 до 30:
+		// bonusPercent = 3.5 + (bet - 1) * ((33.3 - 3.5) / (30 - 1))
+		bonusPercent := 3.5 + (bet-1)*(29.8/29)
+		return 1.0 + bonusPercent/100.0
+	}
+}
+
 // PlayResponse – структура ответа на игровой запрос.
 type PlayResponse struct {
 	Status           string   `json:"status"`
 	Message          string   `json:"message"` // Возможные значения: "loss", "micro_win", "normal_win", "jackpot", "extra_spins"
 	Reels            []string `json:"reels"`
-	WinAmount        float64  `json:"win_amount"`
+	WinAmount        float64  `json:"win_amount"` // Для обычного режима – чистый выигрыш (гросс - ставка), для фриспинов – полный (гросс) выигрыш
 	NewBalance       float64  `json:"new_balance"`
 	FreeSpins        int      `json:"free_spins"`
+	Jackpot          float64  `json:"jackpot"` // актуальное значение прогрессивного джекпота
 	JackpotText      string   `json:"jackpot_text,omitempty"`
 	VisualChanceText string   `json:"visualChanceText,omitempty"`
 }
@@ -115,7 +134,7 @@ func (sm *SlotMachine) updateFreeSpins(telegramID string, newCount int) error {
 	return err
 }
 
-// getJackpot возвращает текущую сумму прогрессивного джекпота.
+// getJackpot возвращает текущее значение прогрессивного джекпота.
 func (sm *SlotMachine) getJackpot() (float64, error) {
 	var amount float64
 	err := sm.DB.QueryRow("SELECT amount FROM jackpot WHERE id = 1").Scan(&amount)
@@ -167,7 +186,7 @@ func (sm *SlotMachine) generateReels(outcome string) []string {
 			reels[i] = baseSymbols[rand.Intn(len(baseSymbols))]
 		}
 		pos := rand.Intn(3)
-		reels[pos] = "FREESPIN"
+		reels[pos] = "🆓"
 		return reels
 	default: // "loss" – все символы различны.
 		if len(baseSymbols) < 3 {
@@ -209,79 +228,128 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 	var bet float64
 	var outcome string
 	var multiplier float64
-	var winAmount float64
+	var grossWin, netWin, winAmount float64
+	var jackpotText string
 
+	// Обработка фриспинов
 	if req.Mode == "fs" {
 		if user.FreeSpins < req.FSCount {
 			http.Error(w, "Недостаточно фриспинов", http.StatusBadRequest)
 			return
 		}
-		bet = 2.0 // Fixed bet for Freespin mode
-		_ = sm.updateFreeSpins(req.TelegramID, user.FreeSpins-req.FSCount)
-
-		// Adjust probabilities based on FSCount
-		var microWinProb, normalWinProb, jackpotProb, extraSpinsProb float64
+		// Фиксированная ставка для режима фриспинов в зависимости от FSCount
 		switch req.FSCount {
 		case 1:
-			microWinProb = 5.0
-			normalWinProb = 2.0
-			jackpotProb = 0.0008
-			extraSpinsProb = 3.8
+			bet = 1.0
 		case 10:
-			microWinProb = 10.0
-			normalWinProb = 4.8
-			jackpotProb = 0.0009
-			extraSpinsProb = 5.3
+			bet = 2.5
 		case 30:
-			microWinProb = 15.0
-			normalWinProb = 10.0
-			jackpotProb = 0.001
-			extraSpinsProb = 7.3
+			bet = 6.3
 		default:
 			http.Error(w, "Invalid FSCount", http.StatusBadRequest)
 			return
 		}
+		_ = sm.updateFreeSpins(req.TelegramID, user.FreeSpins-req.FSCount)
+
+		// Настройка фиксированных вероятностей для фриспинов
+		var microWinProbFS, normalWinProbFS, jackpotProbFS, extraSpinsProbFS float64
+		switch req.FSCount {
+		case 1:
+			microWinProbFS = 5.0
+			normalWinProbFS = 2.0
+			jackpotProbFS = 0.0008
+			extraSpinsProbFS = 3.8
+		case 10:
+			microWinProbFS = 10.0
+			normalWinProbFS = 4.8
+			jackpotProbFS = 0.0009
+			extraSpinsProbFS = 5.3
+		case 30:
+			microWinProbFS = 15.0
+			normalWinProbFS = 10.0
+			jackpotProbFS = 0.001
+			extraSpinsProbFS = 7.3
+		}
 
 		rFloat := rand.Float64() * 100
 		switch {
-		case rFloat < jackpotProb:
+		case rFloat < jackpotProbFS:
 			outcome = "jackpot"
-			multiplier = 1500
-		case rFloat < jackpotProb+normalWinProb:
+		case rFloat < jackpotProbFS+normalWinProbFS:
 			outcome = "normal_win"
-			multiplier = 5.0 + rand.Float64()*5.0 // 5x to 10x
-		case rFloat < jackpotProb+normalWinProb+microWinProb:
+		case rFloat < jackpotProbFS+normalWinProbFS+microWinProbFS:
 			outcome = "micro_win"
-			multiplier = 1.5 + rand.Float64()*1.5 // 1.5x to 3x
-		case rFloat < jackpotProb+normalWinProb+microWinProb+extraSpinsProb:
+		case rFloat < jackpotProbFS+normalWinProbFS+microWinProbFS+extraSpinsProbFS:
 			outcome = "extra_spins"
 			user.FreeSpins += 2
 			_ = sm.updateFreeSpins(req.TelegramID, user.FreeSpins)
 		default:
 			outcome = "loss"
 		}
+
+		// Получаем текущее значение jackpot
+		jackpot, _ := sm.getJackpot()
+		switch outcome {
+		case "jackpot":
+			// Выигрыш = jackpot, чистый выигрыш = jackpot - bet (для fs не списываем ставку отдельно)
+			grossWin = jackpot
+			netWin = grossWin - bet
+			// Для fs отображаем полный (гросс) выигрыш
+			winAmount = grossWin
+			_ = sm.updateUserBalance(req.TelegramID, grossWin, grossWin)
+			_ = sm.updateJackpot(777)
+			jackpotText = fmt.Sprintf("🎉 Jackpot! You won %.2f JPC!", jackpot)
+			jackpot = 777
+		case "normal_win", "micro_win":
+			// Используем фиксированные суммы выигрыша для fs
+			if req.FSCount == 1 {
+				if outcome == "micro_win" {
+					winAmount = 1.2
+				} else { // normal_win
+					winAmount = 1.9
+				}
+			} else if req.FSCount == 10 {
+				if outcome == "micro_win" {
+					winAmount = 3.4
+				} else {
+					winAmount = 4.7
+				}
+			} else if req.FSCount == 30 {
+				if outcome == "micro_win" {
+					winAmount = 6.8
+				} else {
+					winAmount = 9.89
+				}
+			}
+			_ = sm.updateUserBalance(req.TelegramID, winAmount, winAmount)
+			jackpot += bet * 0.05
+			_ = sm.updateJackpot(jackpot)
+		case "extra_spins":
+			winAmount = 0
+		case "loss":
+			winAmount = 0
+			jackpot += bet * 0.05
+			_ = sm.updateJackpot(jackpot)
+		}
 	} else {
+		// Нормальный режим игры
 		bet = req.Bet
 		if user.Balance < bet {
 			http.Error(w, "Insufficient balance", http.StatusBadRequest)
 			return
 		}
+		// Списываем ставку (вычитаем её из баланса)
 		_ = sm.updateUserBalance(req.TelegramID, -bet, 0)
 		jackpot, _ := sm.getJackpot()
-		jackpot += bet * 0.05
-		_ = sm.updateJackpot(jackpot)
 
 		rFloat := rand.Float64() * 100
 		switch {
 		case rFloat < normalJackpotProb:
 			outcome = "jackpot"
-			multiplier = 1500
 		case rFloat < normalJackpotProb+normalWinProb:
 			outcome = "normal_win"
-			multiplier = 1.05 + rand.Float64()*0.05
 		case rFloat < normalJackpotProb+normalWinProb+microWinProb:
 			outcome = "micro_win"
-			multiplier = 1.3 - (bet-1)*0.008 + rand.Float64()*0.01
 		case rFloat < normalJackpotProb+normalWinProb+microWinProb+freeSpinProb:
 			outcome = "extra_spins"
 			user.FreeSpins++
@@ -289,49 +357,77 @@ func (sm *SlotMachine) Play(w http.ResponseWriter, r *http.Request) {
 		default:
 			outcome = "loss"
 		}
-	}
 
-	// Calculate winAmount and update balance
-	jackpotText := ""
-	switch outcome {
-	case "jackpot":
-		jackpotWon, _ := sm.getJackpot()
-		winAmount = bet*multiplier + jackpotWon
-		_ = sm.updateUserBalance(req.TelegramID, winAmount, winAmount)
-		_ = sm.updateJackpot(0)
-		jackpotText = fmt.Sprintf("🎉 Jackpot! You won an extra %.2f USDT!", jackpotWon)
-		jackpotChance = 0.001
-	case "normal_win", "micro_win":
-		winAmount = bet * multiplier
-		_ = sm.updateUserBalance(req.TelegramID, winAmount, winAmount)
-	case "extra_spins":
-		winAmount = 0 // No direct monetary win for extra spins
-	case "loss":
-		winAmount = 0
-		if req.Mode != "fs" {
-			jackpotChance += 0.0005
+		switch outcome {
+		case "jackpot":
+			grossWin = jackpot
+			netWin = grossWin - bet
+			winAmount = netWin
+			_ = sm.updateUserBalance(req.TelegramID, grossWin, grossWin)
+			_ = sm.updateJackpot(777)
+			jackpotText = fmt.Sprintf("🎉 Jackpot! You won %.2f JPC!", jackpot)
+			jackpot = 777
+		default:
+			jackpot += bet * 0.05
+			_ = sm.updateJackpot(jackpot)
+			if outcome == "normal_win" || outcome == "micro_win" {
+				multiplier = calcMultiplier(bet)
+				grossWin = bet * multiplier
+				netWin = grossWin - bet
+				winAmount = netWin
+				_ = sm.updateUserBalance(req.TelegramID, grossWin, grossWin)
+			} else if outcome == "extra_spins" || outcome == "loss" {
+				winAmount = 0
+			}
 		}
 	}
 
-	reels := sm.generateReels(outcome)
-	updatedUser, _ := sm.getUser(req.TelegramID)
+	// Определяем текст для визуального отображения при проигрыше
+	// Если outcome == "loss": в 65% случаев "❌ Проигрыш!", в 35% случаев "+Х% к шансу"
+	// Если outcome == "micro_win": как сейчас "+Х% к шансу"
 	visualText := ""
-	if outcome == "loss" || outcome == "micro_win" {
+	if outcome == "loss" {
+		if rand.Float64()*100 < 65 {
+			visualText = "❌ Проигрыш!"
+		} else {
+			visualText = fmt.Sprintf("+%d%% к шансу", req.VisualChance)
+		}
+	} else if outcome == "micro_win" {
 		visualText = fmt.Sprintf("+%d%% к шансу", req.VisualChance)
 	}
 
 	resp := PlayResponse{
-		Status:           "ok",
-		Message:          outcome,
-		Reels:            reels,
-		WinAmount:        winAmount,
-		NewBalance:       updatedUser.Balance,
-		FreeSpins:        updatedUser.FreeSpins,
+		Status:     "ok",
+		Message:    outcome,
+		Reels:      sm.generateReels(outcome),
+		WinAmount:  winAmount,    // для fs – полный (гросс) выигрыш, для нормального режима – чистый выигрыш (gross - bet)
+		NewBalance: user.Balance, // обновленный баланс получаем ниже
+		FreeSpins:  user.FreeSpins,
+		Jackpot: func() float64 {
+			j, _ := sm.getJackpot()
+			return j
+		}(),
 		JackpotText:      jackpotText,
 		VisualChanceText: visualText,
 	}
+
+	// Обновляем баланс пользователя после всех операций
+	updatedUser, _ := sm.getUser(req.TelegramID)
+	resp.NewBalance = updatedUser.Balance
+
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// JackpotHandler возвращает текущее значение глобального jackpot в формате JSON.
+func (sm *SlotMachine) JackpotHandler(w http.ResponseWriter, r *http.Request) {
+	jackpot, err := sm.getJackpot()
+	if err != nil {
+		http.Error(w, "Error fetching jackpot", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]float64{"jackpot": jackpot})
 }
 
 // GamePageHandler рендерит страницу слотов по GET-параметру telegram_id.
