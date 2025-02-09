@@ -8,17 +8,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Верхняя панель -->
     <div class="top-bar">
         <a href="/freespin?telegram_id={{.TelegramID}}" class="top-button free-spin-btn" id="freespin-btn">🎁</a>
-        <!-- Удаляем ссылку для слотов из верхней панели -->
         <button class="top-button account-btn" id="account-btn">👤</button>
     </div>
 
-    <!-- Карточка баланса -->
     <div class="balance-card">
         <div class="main-balance">
-            <h2><h2>{{ printf "%.2f" .Balance }}</h2> JPC</h2>
+            <h2>{{ printf "%.2f" .Balance }} JPC</h2>
         </div>
         <hr class="balance-divider">
         <div class="other-balances">
@@ -27,10 +24,8 @@
         </div>
     </div>
 
-    <!-- Разделительная линия -->
     <hr class="divider">
 
-    <!-- Управление счетом -->
     <div class="account-actions">
         <button class="account-btn" title="Deposit">💰</button>
         <button class="account-btn" title="Withdraw">📤</button>
@@ -38,18 +33,14 @@
         <button class="account-btn" title="Referrals">👥</button>
     </div>
 
-    <!-- Разделительная линия -->
     <hr class="divider">
 
-    <!-- Кнопки действий -->
     <div class="actions">
         <button class="action-btn" id="casino-btn">ROULETTE</button>
-        <!-- Переделываем кнопку SLOTS в ссылку с передачей telegram_id -->
         <a href="/slots/?telegram_id={{.TelegramID}}" class="action-btn">SLOTS</a>
         <button class="action-btn">LOTTERY</button>
     </div>
 
-    <!-- Модальное окно -->
     <div class="modal hide" id="account-modal">
         <div class="modal-content">
             <span class="close" id="close-modal">&times;</span>
@@ -63,3 +54,4 @@
     <script src="/static/js/account.js"></script>
 </body>
 </html>
+

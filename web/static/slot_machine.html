@@ -9,214 +9,553 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
-            background-color: #0a0d17;
+            background: url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/back-wTGaYzvEYyfpE5MvwY5Rf73i6dSbFY.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            margin-bottom: 10px;
         }
 
-        .stats-card {
-            background: #1c1f2e;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .back-button {
+            font-size: 24px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .balance-display {
             text-align: center;
         }
 
-        .title {
-            font-size: 2rem;
+        .balance-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
             font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
         }
 
-        .stat-item {
-            margin: 10px 0;
-            font-size: 1.1rem;
+        .leaderboard-icon {
+            font-size: 24px;
+            padding: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
 
-        .slot-machine {
-            background: #1c1f2e;
-            border: 2px solid #ffd700;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .leaderboard-icon:hover {
+            transform: scale(1.1);
         }
 
-        .reels {
+        .slot-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(15px); /* Размытие фона */
+            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
+        }
+
+        .slots {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
-        .reel {
-            background: #2a2d3a;
-            border-radius: 8px;
-            aspect-ratio: 4/3;
+        .slot {
+            background: rgb(255, 255, 255);
+            border-radius: 10px;
+            aspect-ratio: 1/1.5;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            position: relative;
             overflow: hidden;
         }
 
         .reel-container {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            transition: transform 0.1s linear;
+            backdrop-filter: blur(15px); /* Размытие фона */
+            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
         }
 
-        input[type="number"] {
+        .reel-item {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: #2a2d3a;
-            color: white;
-            font-size: 1rem;
-            text-align: center;
-        }
-
-        .checkbox-wrapper {
+            height: 33.33%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-size: 60px;
         }
 
-        button {
+        .slot-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,0.9) 0%, 
+                rgba(255,255,255,0) 20%, 
+                rgba(255,255,255,0) 80%, 
+                rgba(255,255,255,0.9) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .bet-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            margin: 5px auto;
             width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #3b82f6;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background: #2563eb;
-        }
-
-        button:disabled {
-            background: #6b7280;
-            cursor: not-allowed;
-        }
-
-        .top-players {
-            background: #1c1f2e;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .top-players h2 {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-
-        .player-item {
+            max-width: 400px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2d3a;
         }
 
-        .win-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 12px;
+        .bet-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .bet-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .bet-display {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .result-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            margin: 5px auto;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            display: none;
-            z-index: 100;
+        }
+
+        .result-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .jackpot-progress {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .freespins-counter {
+            text-align: center;
+            font-size: 16px;
+            margin: 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 20px;
+        }
+
+        .game-button {
+            padding: 15px;
+            font-size: 20px;
+            border: none;
+            border-radius: 25px;
+            background: #4a90e2;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .game-button:hover {
+            background: #3a7bc8;
+            transform: translateY(-2px);
+        }
+
+        .game-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .fs-controls {
-            display: flex;
+            display: none;
             gap: 10px;
             margin-top: 10px;
         }
 
         .fs-button {
             flex: 1;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+        }
+
+        .modal {
+            background: rgba(28, 31, 46, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
             padding: 10px;
-            font-size: 0.9rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-table th {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #a9d1ff;
+        }
+
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Bet input modal */
+        .bet-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(15px); /* Размытие фона */
+            -webkit-backdrop-filter: blur(15px); /* Поддержка для Safari */
+
+
+        }
+
+        .bet-modal.show {
+            opacity: 1;
+        }
+
+        .bet-modal-content {
+            background: rgba(28, 31, 46, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 300px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .bet-modal.show .bet-modal-content {
+            transform: translateY(0);
+        }
+
+        .bet-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+        }
+
+        .bet-confirm {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .bet-confirm:hover {
+            background: #3a7bc8;
+            transform: translateY(-2px);
+        }
+
+        @keyframes shake {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-5px); }
+            50% { transform: translateY(5px); }
+            75% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+
+        .shaking {
+            animation: shake 0.5s ease-in-out;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Shark Win Slots</h1>
-        
-        <div class="stats-card">
-            <div class="stat-item">Баланс: <span id="balance">{{printf "%.2f" .Balance}}</span> JPC USDT</div>
-            <div class="stat-item">Free Spins: <span id="freeSpins">{{.FreeSpins}}</span></div>
-            <div class="stat-item">Прогрессивный Джекпот: <span id="jackpot">{{printf "%.2f" .Jackpot}}</span> USDT</div>
+    <div class="header">
+        <button class="back-button">←</button>
+        <div class="balance-display">
+            <div class="balance-label">B A L A N C E</div>
+            <div class="balance-amount"><span id="balance">{{printf "%.2f" .Balance}}</span> JPC</div>
         </div>
+        <div class="leaderboard-icon">👑</div>
+    </div>
 
-        <div class="slot-machine">
-            <div class="reels">
-                <div class="reel"><div class="reel-container">❓</div></div>
-                <div class="reel"><div class="reel-container">❓</div></div>
-                <div class="reel"><div class="reel-container">❓</div></div>
-            </div>
-
-            <div class="controls">
-                <input type="number" id="betAmount" min="0.1" max="30" step="0.1" value="0.1" placeholder="Введите ставку (0.1-30)">
-                <button id="spinButton">Вращать</button>
-                <button id="freespinButton">Freespin</button>
-                <div class="fs-controls" style="display: none;">
-                    <button class="fs-button" data-fs="1">1 FS</button>
-                    <button class="fs-button" data-fs="10">10 FS</button>
-                    <button class="fs-button" data-fs="30">30 FS</button>
+    <div class="slot-container">
+        <div class="slots">
+            <div class="slot">
+                <div class="reel-container" id="reel1">
+                    <!-- Will be filled by JavaScript -->
                 </div>
+                <div class="slot-overlay"></div>
             </div>
-        </div>
-
-        <div class="top-players">
-            <h2>Топ-10 игроков</h2>
-            <div id="topPlayersList"></div>
+            <div class="slot">
+                <div class="reel-container" id="reel2">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+                <div class="slot-overlay"></div>
+            </div>
+            <div class="slot">
+                <div class="reel-container" id="reel3">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+                <div class="slot-overlay"></div>
+            </div>
         </div>
     </div>
 
-    <div class="win-message" id="winMessage"></div>
+    <div class="bet-container">
+        <button id="decreaseBet" class="bet-button">-</button>
+        <span class="bet-display">Ставка: <span id="betDisplay">0.1</span> JPC</span>
+        <button id="increaseBet" class="bet-button">+</button>
+    </div>
+
+    <div class="result-container">
+        <div class="result-text" id="resultText">Win Shark 🦈</div>
+        <div class="jackpot-progress">JACKPOT PROGRESS: <span id="jackpot">{{printf "%.2f" .Jackpot}}</span> JPC</div>
+    </div>
+
+    <div class="freespins-counter">
+        FREESPINS: <span id="freeSpins">{{.FreeSpins}}</span> FS
+    </div>
+
+    <div class="button-container">
+        <button id="spinButton" class="game-button">ВРАЩАТЬ</button>
+        <button id="freespinButton" class="game-button">FREESPIN</button>
+        <div class="fs-controls">
+            <button class="game-button fs-button" data-fs="1">1 FS</button>
+            <button class="game-button fs-button" data-fs="10">10 FS</button>
+            <button class="game-button fs-button" data-fs="30">30 FS</button>
+        </div>
+    </div>
+
+    <!-- Top Players Modal -->
+    <div class="modal-overlay" id="topPlayersModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Топ-10 игроков</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Игрок</th>
+                        <th>Выигрыш</th>
+                    </tr>
+                </thead>
+                <tbody id="topPlayersList">
+                    <!-- Will be filled by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bet Input Modal -->
+    
+    <div class="bet-modal" id="betModal">
+        <div class="bet-modal-content">
+            <input type="number" id="betInput" class="bet-input" min="0.1" max="30" step="0.1" value="0.1">
+            <button id="confirmBet" class="bet-confirm">Подтвердить</button>
+        </div>
+    </div>
 
     <script>
         const telegramId = "{{.TelegramID}}";
         let isSpinning = false;
         let currentMode = "normal";
         let selectedFSCount = 0;
+        let currentBet = 0.1;
+
+        const symbols = ['🐬', '🐟', '🐙', '💎', '🌊'];
+        const reelHeight = 100; // height of one symbol in percentage
+
+        function createReelContent(reelId) {
+            const reel = document.getElementById(reelId);
+            reel.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                const div = document.createElement('div');
+                div.className = 'reel-item';
+                div.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                reel.appendChild(div);
+            }
+        }
+
+        function initReels() {
+            createReelContent('reel1');
+            createReelContent('reel2');
+            createReelContent('reel3');
+        }
+
+        function spinReel(reelId, finalSymbol, delay) {
+            return new Promise(resolve => {
+                const reel = document.getElementById(reelId);
+                const slot = reel.parentElement;
+                const spinDuration = 2750; // Total spin duration in ms
+                
+                slot.classList.add('shaking');
+                
+                let currentIndex = 0;
+                const intervalId = setInterval(() => {
+                    reel.children[0].textContent = symbols[currentIndex];
+                    reel.children[1].textContent = symbols[(currentIndex + 1) % symbols.length];
+                    reel.children[2].textContent = symbols[(currentIndex + 2) % symbols.length];
+                    currentIndex = (currentIndex + 1) % symbols.length;
+                }, 100);
+
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                    reel.children[0].textContent = finalSymbol;
+                    reel.children[1].textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    reel.children[2].textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    slot.classList.remove('shaking');
+                    resolve();
+                }, spinDuration + delay * 700);
+            });
+        }
 
         async function spin() {
             if (isSpinning) return;
             
-            const betAmount = parseFloat(document.getElementById('betAmount').value);
-            
-            if (currentMode === "normal" && (betAmount < 0.1 || betAmount > 30)) {
-                alert('Ставка должна быть от 0.1 до 30 USDT');
-                return;
-            }
-
             isSpinning = true;
             document.getElementById('spinButton').disabled = true;
             document.getElementById('freespinButton').disabled = true;
@@ -229,96 +568,80 @@
                     },
                     body: JSON.stringify({
                         telegram_id: telegramId,
-                        bet: betAmount,
+                        bet: currentBet,
                         mode: currentMode,
                         fsCount: selectedFSCount,
                         visualChance: Math.floor(Math.random() * 5) + 1
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const result = await response.json();
                 
-                // Animate reels
-                const reels = document.querySelectorAll('.reel-container');
-                const symbols = result.reels;
+                await Promise.all([
+                    spinReel('reel1', result.reels[0], 0),
+                    spinReel('reel2', result.reels[1], 1),
+                    spinReel('reel3', result.reels[2], 2)
+                ]);
                 
-                reels.forEach((reel, index) => {
-                    // Create animation effect
-                    const symbolsToShow = ['🐬', '🐟', '🐙', '💎', '🌊'];
-                    let currentPos = 0;
-                    
-                    const interval = setInterval(() => {
-                        reel.textContent = symbolsToShow[currentPos];
-                        currentPos = (currentPos + 1) % symbolsToShow.length;
-                    }, 100);
-
-                    // Stop animation after delay
-                    setTimeout(() => {
-                        clearInterval(interval);
-                        reel.textContent = symbols[index];
-                        
-                        // If this is the last reel, show results
-                        if (index === 2) {
-                            showResults(result);
-                        }
-                    }, 1000 + (index * 500));
-                });
+                showResults(result);
 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Произошла ошибка при вращении');
+                alert('Произошла ошибка при вращении! (' + error + ')');
             } finally {
                 setTimeout(() => {
                     isSpinning = false;
                     document.getElementById('spinButton').disabled = false;
                     document.getElementById('freespinButton').disabled = false;
-                }, 2500);
+                }, 2);
             }
         }
 
         function showResults(result) {
-            const winMessage = document.getElementById('winMessage');
-            let message = '';
-
+            const resultText = document.getElementById('resultText');
+            
             switch(result.message) {
                 case 'jackpot':
-                    message = `🎉 ДЖЕКПОТ! Выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    resultText.textContent = `🤩 ДЖЕКПОТ! ${result.win_amount.toFixed(2)} JPC`;
                     break;
                 case 'normal_win':
-                    message = `🎉 Выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
                     break;
                 case 'micro_win':
-                    message = `✨ Маленький выигрыш: ${result.win_amount.toFixed(2)} USDT`;
+                    resultText.textContent = `🎉 ВЫИГРЫШ: ${result.win_amount.toFixed(2)} JPC`;
                     break;
                 case 'extra_spins':
-                    message = '🎁 Вы выиграли Free Spin!';
+                    resultText.textContent = '🎰 ПОЛУЧЕНО 2 FS!';
                     break;
                 default:
                     if (result.visualChanceText) {
-                        message = result.visualChanceText;
+                        resultText.textContent = result.visualChanceText;
+                    } else {
+                        resultText.textContent = 'ПРОИГРЫШ!';
                     }
             }
 
-            if (message) {
-                winMessage.textContent = message;
-                winMessage.style.display = 'block';
-                setTimeout(() => {
-                    winMessage.style.display = 'none';
-                }, 3000);
-            }
-
-            // Update balance and free spins after showing the result
             document.getElementById('balance').textContent = result.new_balance.toFixed(2);
             document.getElementById('freeSpins').textContent = result.free_spins;
             
-            // Update jackpot if needed
             if (result.jackpot_text) {
                 document.getElementById('jackpot').textContent = '0.00';
             }
+        }
+
+        function showTopPlayersModal() {
+            const modal = document.getElementById('topPlayersModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+            updateTopPlayers();
+        }
+
+        function hideTopPlayersModal() {
+            const modal = document.getElementById('topPlayersModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
         }
 
         async function updateTopPlayers() {
@@ -327,16 +650,39 @@
                 const players = await response.json();
                 
                 const list = document.getElementById('topPlayersList');
-                list.innerHTML = players.map(player => `
-                    <div class="player-item">
-                        <span>${player.username}</span>
-                        <span>${player.total_win.toFixed(2)} USDT</span>
-                    </div>
+                list.innerHTML = players.map((player, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${player.username}</td>
+                        <td>${player.total_win.toFixed(2)} JPC</td>
+                    </tr>
                 `).join('');
             } catch (error) {
                 console.error('Error updating top players:', error);
             }
         }
+
+        function showBetModal() {
+            const modal = document.getElementById('betModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function hideBetModal() {
+            const modal = document.getElementById('betModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function updateBetDisplay() {
+            document.getElementById('betDisplay').textContent = currentBet.toFixed(1);
+        }
+
+        document.querySelector('.leaderboard-icon').addEventListener('click', showTopPlayersModal);
+        document.querySelector('.close-modal').addEventListener('click', hideTopPlayersModal);
+        document.getElementById('topPlayersModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) hideTopPlayersModal();
+        });
 
         document.getElementById('spinButton').addEventListener('click', () => {
             currentMode = "normal";
@@ -356,9 +702,43 @@
             });
         });
 
-        // Update top players every 30 seconds
-        updateTopPlayers();
-        setInterval(updateTopPlayers, 30000);
+        document.querySelector('.back-button').addEventListener('click', () => {
+            window.history.back();
+        });
+
+        document.getElementById('decreaseBet').addEventListener('click', () => {
+            if (currentBet > 0.1) {
+                currentBet = Math.max(0.1, currentBet - 0.1);
+                updateBetDisplay();
+            }
+        });
+
+        document.getElementById('increaseBet').addEventListener('click', () => {
+            if (currentBet < 30) {
+                currentBet = Math.min(30, currentBet + 0.1);
+                updateBetDisplay();
+            }
+        });
+
+        document.querySelector('.bet-display').addEventListener('click', showBetModal);
+
+        document.getElementById('confirmBet').addEventListener('click', () => {
+            const newBet = parseFloat(document.getElementById('betInput').value);
+            if (newBet >= 0.1 && newBet <= 30) {
+                currentBet = newBet;
+                updateBetDisplay();
+                hideBetModal();
+            } else {
+                alert('Ставка должна быть от 0.1 до 30 JPC');
+            }
+        });
+
+        document.getElementById('betModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) hideBetModal();
+        });
+
+        initReels();
+        updateBetDisplay();
     </script>
 </body>
 </html>
