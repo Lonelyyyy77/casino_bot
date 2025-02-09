@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"main.go/data"
+	"main.go/slotmachine"
 )
 
 // TemplateData содержит данные для шаблона
@@ -85,16 +86,64 @@ func UpdateBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status": "success"}`))
 }
 
+func ServeFreeSpin(w http.ResponseWriter, r *http.Request) {
+	telegramID := r.URL.Query().Get("telegram_id")
+	if telegramID == "" {
+		http.Error(w, "telegram_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Получаем баланс из базы данных
+	var balance float64
+	err := data.DB.QueryRow("SELECT balance FROM user WHERE telegram_id = ?", telegramID).Scan(&balance)
+	if err != nil {
+		fmt.Println("Error fetching balance:", err)
+		balance = 0.0 // Если ошибка, баланс по умолчанию
+	}
+
+	// Рендерим шаблон freespin.html
+	tmpl, err := template.New("freespin.html").ParseFiles("./web/static/freespin.html")
+	if err != nil {
+		fmt.Println("Error loading template:", err)
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
+	}
+
+	// Передача данных в шаблон
+	data := struct {
+		Balance    float64
+		TelegramID string
+	}{
+		Balance:    balance,
+		TelegramID: telegramID,
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		fmt.Println("Error rendering template:", err)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+	}
+}
+
 // StartServer запускает HTTP сервер
 func StartServer() {
+
 	// Обработка статических файлов
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
 
-	// Обработка главной страницы
 	http.HandleFunc("/", ServeIndex)
 
-	// Обработка обновления баланса
+	http.HandleFunc("/freespin", ServeFreeSpin)
+
 	http.HandleFunc("/update_balance", UpdateBalanceHandler)
+
+	// Регистрируем обработчики для слотов:
+	sm := slotmachine.New()
+	http.HandleFunc("/slots/", sm.GamePageHandler)      // Страница игры: /slots/?telegram_id=...
+	http.HandleFunc("/slots/play", sm.Play)             // Endpoint для вращения
+	http.HandleFunc("/slots/top", sm.TopPlayersHandler) // Топ-10 игроков
+
+	fmt.Println("SlotMachine endpoints registered under /slots/")
 
 	fmt.Println("Starting server on :8080")
 	err := http.ListenAndServe(":8080", nil)

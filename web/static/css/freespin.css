@@ -1,0 +1,128 @@
+/* Страница фриспина */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', Arial, sans-serif;
+    background: linear-gradient(to bottom, #0f172a, #1e293b); /* Тёмно-синий градиент */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+}
+
+/* Верхняя панель */
+.top-bar {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0 20px;
+}
+
+.back-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Синие градиенты */
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.back-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Заголовок */
+.freespin-header h1 {
+    font-size: 32px;
+    color: #7aadff; /* Голубой акцент */
+    margin-top: 70px;
+}
+
+/* Прокручиваемые карточки */
+.spin-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 30px 0;
+    overflow: hidden;
+}
+
+.spin-card {
+    background: linear-gradient(145deg, #1E293B, #111827); /* Темный градиент карточек */
+    color: #94a3b8; /* Светло-серый текст */
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    width: 120px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.spin-card:hover {
+    transform: scale(1.05);
+}
+
+.spin-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: white;
+}
+
+.spin-label {
+    font-size: 18px;
+    color: #7aadff;
+}
+
+/* Баланс и кнопка */
+.spin-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.balance-info {
+    font-size: 18px;
+    color: #94a3b8;
+}
+
+.balance-text {
+    font-weight: normal;
+}
+
+.balance-amount {
+    font-weight: bold;
+    color: #7aadff;
+}
+
+.spin-button {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 18px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.spin-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
+}
