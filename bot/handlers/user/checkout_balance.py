@@ -7,7 +7,6 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
 import sqlite3
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from pyexpat.errors import messages
 
 from bot.database import DB_NAME
 from bot.start_bot import crypto
