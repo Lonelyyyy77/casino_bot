@@ -38,7 +38,7 @@ async def start_keyboard(user_id: int):
     Создаем Inline-клавиатуру, в которой web_app_url формируется,
     используя переданный user_id напрямую.
     """
-    web_app_url = f"https://9e86-91-234-26-159.ngrok-free.app?telegram_id={user_id}"
+    web_app_url = f"https://casinobot-production.up.railway.app?telegram_id={user_id}"
 
     kbds = InlineKeyboardBuilder()
     kbds.row(
