@@ -55,3 +55,17 @@ def get_user_statistics():
         "last_month": users_last_month,
         "total": total_users
     }
+
+
+def set_menu_image(section: str, image_url: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO menu_images (section, image_url) 
+        VALUES (?, ?) 
+        ON CONFLICT(section) DO UPDATE SET image_url = excluded.image_url
+    """, (section, image_url))
+
+    conn.commit()
+    conn.close()

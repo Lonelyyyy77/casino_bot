@@ -16,17 +16,25 @@ async def admin_panel(callback: types.CallbackQuery):
     stats = get_user_statistics()
 
     stats_message = (
-        f"👥 Статистика пользователей:\n\n"
-        f"📅 За последние 24 часа: {stats['last_day']}\n"
-        f"📅 За последние 7 дней: {stats['last_week']}\n"
-        f"📅 За последний месяц: {stats['last_month']}\n"
-        f"👤 Всего пользователей: {stats['total']}\n"
+        f"👥 <b>Статистика пользователей:</b>\n\n"
+        f"📅 <b>За последние 24 часа:</b> {stats['last_day']}\n"
+        f"📅 <b>За последние 7 дней:</b> {stats['last_week']}\n"
+        f"📅 <b>За последний месяц:</b> {stats['last_month']}\n"
+        f"👤 <b>Всего пользователей:</b> {stats['total']}\n"
     )
 
     kb = InlineKeyboardBuilder()
-    kb.row(InlineKeyboardButton(text="Посмотреть всех пользователей", callback_data="view_users"))
-    kb.row(InlineKeyboardButton(text="Сделать рассылку", callback_data="mailing"))
-    kb.row(InlineKeyboardButton(text="Настройка реферального процента", callback_data="adjust_referral_percent"))
+    kb.row(InlineKeyboardButton(text="👥 Посмотреть всех пользователей", callback_data="view_users"))
+    kb.row(InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="mailing"))
+    kb.row(InlineKeyboardButton(text="💰 Настроить реферальный процент", callback_data="adjust_referral_percent"))
     kb.row(InlineKeyboardButton(text='⚙️ Установить процент выигрыша', callback_data='set_global_percentage'))
+    kb.row(InlineKeyboardButton(text='🖼 Установить картинку для меню', callback_data='admin_set_image'))
+    kb.row(InlineKeyboardButton(text="🔙 Назад", callback_data='home'))
 
-    await callback.message.answer(stats_message, reply_markup=kb.as_markup())
+    if callback.message.text:
+        await callback.message.edit_text(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+    elif callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+
+

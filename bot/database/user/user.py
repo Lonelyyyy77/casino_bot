@@ -108,3 +108,15 @@ def get_user_by_username(username: str):
         'is_frizzed_checkout': row[14],
         'has_completed_captcha': row[15]
     }
+
+
+def get_menu_image(section: str):
+    """Получает URL изображения для указанного раздела."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT image_url FROM menu_images WHERE section = ?", (section,))
+    result = cursor.fetchone()
+
+    conn.close()
+    return result[0] if result else None

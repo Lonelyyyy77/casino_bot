@@ -16,3 +16,8 @@ class ReferralSettingsState(StatesGroup):
 
 class SetPercentageStates(StatesGroup):
     waiting_for_percentage = State()
+
+
+class UploadImageState(StatesGroup):
+    waiting_for_section = State()
+    waiting_for_image = State()

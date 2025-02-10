@@ -1,16 +1,17 @@
 import sqlite3
 import random
 from itertools import zip_longest
+from lib2to3.fixes.fix_print import parend_expr
 from typing import Union
 
 from aiogram import Router, types
-from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardButton, CallbackQuery
+from aiogram.filters import CommandStart, Command
+from aiogram.types import InlineKeyboardButton, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
 from bot.database.admin.admin import is_admin
-from bot.database.user.user import add_user_to_db, get_user_balance
+from bot.database.user.user import add_user_to_db, get_user_balance, get_menu_image
 from bot.start_bot import bot
 
 router = Router()
@@ -60,7 +61,6 @@ async def start_handler(message: types.Message):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Не указано"
 
-    # сразу генерируем клавиатуру по user_id
     keyboard = await start_keyboard(telegram_id)
 
     conn = sqlite3.connect(DB_NAME)
@@ -73,7 +73,6 @@ async def start_handler(message: types.Message):
     user_data = cursor.fetchone()
 
     if not user_data:
-        # пользователь новый
         referrer_id = None
         if message.text and len(message.text.split()) > 1:
             try:
@@ -123,15 +122,20 @@ async def start_handler(message: types.Message):
         return
 
     balance_jpc = get_user_balance(telegram_id)
-    balance_usd = balance_jpc
+    balance_usd = round(balance_jpc, 3)
     balance_jpc = round(balance_jpc, 3)
-    balance_usd = round(balance_usd, 3)
 
-    await message.answer(
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\n"
-        f"Выберите, что хотите сделать:",
-        reply_markup=keyboard
+    home_image = get_menu_image("home")
+
+    text = (
+        "<b>Привет! 👋</b>\n"
+        f"💎 <b>Ваш текущий баланс:</b>"
+        f"<b> {balance_jpc} JPC</b> (<i>${balance_usd}</i>)\n"
+        f"👉 <b>Выберите, что хотите сделать:</b>"
     )
+
+    if home_image:
+        await message.answer_photo(photo=home_image, caption=f"{text}", reply_markup=keyboard, parse_mode='HTML')
 
     if is_new_user and referrer_id:
         await notify_referrer(referrer_id, username)
@@ -223,9 +227,8 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
 
 
 @router.callback_query(lambda c: c.data == 'home')
-async def home(source: Union[types.CallbackQuery, types.Message]):
-    telegram_id = source.from_user.id
-
+async def home(callback: types.CallbackQuery):
+    telegram_id = callback.from_user.id
     keyboard = await start_keyboard(telegram_id)
 
     balance_jpc = get_user_balance(telegram_id)
@@ -233,17 +236,16 @@ async def home(source: Union[types.CallbackQuery, types.Message]):
     balance_jpc = round(balance_jpc, 3)
 
     text = (
-        f"Привет! Ваш текущий баланс: {balance_jpc} JPC (${balance_usd}).\n"
-        f"Выберите, что хотите сделать:"
+        "<b>Привет! 👋</b>\n"
+        f"💎 <b>Ваш текущий баланс:</b> "
+        f"<b>{balance_jpc} JPC</b> (<i>${balance_usd}</i>)\n"
+        f"👉 <b>Выберите, что хотите сделать:</b>"
     )
 
-    if isinstance(source, types.CallbackQuery):
-        await source.message.edit_text(
-            text,
-            reply_markup=keyboard
-        )
+    home_image = get_menu_image("home")
+
+    if home_image:
+        media = InputMediaPhoto(media=home_image, caption=text, parse_mode="HTML")
+        await callback.message.edit_media(media, reply_markup=keyboard)
     else:
-        await source.answer(
-            text,
-            reply_markup=keyboard
-        )
+        await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")

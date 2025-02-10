@@ -27,9 +27,11 @@ async def admin_routers(dp) -> Router():
     from ..admin.mailing import router as admin_mailing_router
     from ..admin.adjust_referral_percent import router as admin_adjust_referral_percent
     from ..admin.percentage import router as admin_percentage_router
+    from ..admin.set_images import router as admin_set_images_router
 
     dp.include_router(admin_router)
     dp.include_router(admin_mailing_router)
+    dp.include_router(admin_set_images_router)
     dp.include_router(admin_view_users)
     dp.include_router(admin_adjust_referral_percent)
     dp.include_router(admin_percentage_router)

@@ -89,6 +89,14 @@ def initialize_database():
         )
         """)
 
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS menu_images (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                section TEXT UNIQUE NOT NULL,
+                image_url TEXT NOT NULL
+            )
+        """)
+
     conn.commit()
     conn.close()
 
