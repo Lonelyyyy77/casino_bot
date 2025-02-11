@@ -2,10 +2,11 @@ import sqlite3
 
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InputFile, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
+from bot.database.user.user import get_menu_image
 from bot.states.user.user import TransferState
 
 router = Router()
@@ -14,11 +15,28 @@ router = Router()
 @router.callback_query(lambda c: c.data == "transfer_balance")
 async def start_transfer(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(TransferState.enter_username)
-    await callback.message.answer(
+
+    transfer_image = get_menu_image("transfer")
+
+    text = (
         "Введите ник пользователя, которому нужно отправить JPC\n\n"
         "Пожалуйста, вводите имя пользователя верно, иначе средства пропадут и возвращены не будут.\n"
         "Пример: @Durov"
     )
+
+    if transfer_image:
+        if isinstance(transfer_image, str):
+            photo = transfer_image
+        else:
+            photo = InputFile(transfer_image)
+
+        try:
+            media = InputMediaPhoto(media=photo, caption=text)
+            await callback.message.edit_media(media=media)
+        except:
+            await callback.message.answer_photo(photo=photo, caption=text)
+    else:
+        await callback.message.answer(text)
 
 
 @router.message(TransferState.enter_username)
@@ -30,11 +48,24 @@ async def enter_username(message: types.Message, state: FSMContext):
 
     await state.update_data(target_username=username)
     await state.set_state(TransferState.enter_amount)
-    await message.answer(
+
+    transfer_image = get_menu_image("transfer")
+
+    text = (
         "Введите сумму, которую нужно передать пользователю\n"
         "Если вы хотите передать сумму с копейками, обозначайте их через точку.\n"
         "Пример: 7.75"
     )
+
+    if transfer_image:
+        if isinstance(transfer_image, str):
+            photo = transfer_image
+        else:
+            photo = InputFile(transfer_image)
+
+        await message.answer_photo(photo=photo, caption=text)
+    else:
+        await message.answer(text)
 
 
 @router.message(TransferState.enter_amount)
@@ -57,10 +88,19 @@ async def enter_amount(message: types.Message, state: FSMContext):
     kb.add(InlineKeyboardButton(text="💸 Передать", callback_data="confirm_transfer"))
     kb.add(InlineKeyboardButton(text="❌ Отмена ❌", callback_data="cancel_transfer"))
 
-    await message.answer(
-        f"Вы собираетесь передать {target_username} {amount:.2f} JPC.\n\n"
-        "Подтвердите действие:",
-        reply_markup=kb.as_markup())
+    transfer_image = get_menu_image("transfer")
+
+    text = f"Вы собираетесь передать {target_username} {amount:.2f} JPC.\n\nПодтвердите действие:"
+
+    if transfer_image:
+        if isinstance(transfer_image, str):
+            photo = transfer_image
+        else:
+            photo = InputFile(transfer_image)
+
+        await message.answer_photo(photo=photo, caption=text, reply_markup=kb.as_markup())
+    else:
+        await message.answer(text, reply_markup=kb.as_markup())
 
 
 @router.callback_query(lambda c: c.data == "confirm_transfer", TransferState.confirm_transfer)
@@ -96,22 +136,46 @@ async def confirm_transfer(callback: types.CallbackQuery, state: FSMContext):
     conn.commit()
     conn.close()
 
-    await callback.message.answer(
-        f"{amount:.2f} JPC были успешно переданы пользователю {target_username}"
-    )
+    transfer_image = get_menu_image("transfer")
+
+    text = f"{amount:.2f} JPC были успешно переданы пользователю {target_username}"
+
+    if transfer_image:
+        if isinstance(transfer_image, str):
+            photo = transfer_image
+        else:
+            photo = InputFile(transfer_image)
+
+        await callback.message.answer_photo(photo=photo, caption=text)
+    else:
+        await callback.message.answer(text)
 
     try:
         await callback.bot.send_message(
             target_user_telegram_id,
-            f"Вам пришли {amount:.2f} JPC от @{callback.from_user.username}"
+            f"💸 Вам пришли {amount:.2f} JPC от @{callback.from_user.username}"
         )
-    except Exception as e:
-        print(f"Не удалось отправить сообщение получателю: {e}")
+    except:
+        pass
 
     await state.clear()
 
 
 @router.callback_query(lambda c: c.data == "cancel_transfer", TransferState.confirm_transfer)
 async def cancel_transfer(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.answer("Передача отменена.")
+    transfer_image = get_menu_image("transfer")
+
+    text = "❌ Передача отменена."
+
+    if transfer_image:
+        if isinstance(transfer_image, str):
+            photo = transfer_image
+        else:
+            photo = InputFile(transfer_image)
+
+        await callback.message.answer_photo(photo=photo, caption=text)
+    else:
+        await callback.message.answer(text)
+
     await state.clear()
+

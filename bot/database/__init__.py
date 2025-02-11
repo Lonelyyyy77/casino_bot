@@ -97,6 +97,25 @@ def initialize_database():
             )
         """)
 
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS promo_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE NOT NULL,
+                bonus_amount REAL NOT NULL,
+                max_activations INTEGER NOT NULL,
+                used_activations INTEGER DEFAULT 0
+            )
+        """)
+
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS used_promos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                telegram_id INTEGER NOT NULL,
+                promo_code TEXT NOT NULL,
+                UNIQUE(telegram_id, promo_code)
+            )
+        """)
+
     conn.commit()
     conn.close()
 

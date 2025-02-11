@@ -2,13 +2,15 @@ import asyncio
 import re
 
 from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
+from aiogram.types import CallbackQuery, InlineKeyboardButton, Message, InputMediaPhoto
 import sqlite3
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
+from bot.database.user.user import get_menu_image
 from bot.start_bot import crypto
 from bot.states.user.user import WithdrawStates
 
@@ -37,7 +39,10 @@ async def checkout_balance_handler(callback: CallbackQuery):
         conn.close()
         return
 
-    # Отправляем сообщение с балансом и inline-кнопками для вывода
+    conn.close()
+
+    withdrawal_image = get_menu_image("withdraw")
+
     keyboard = InlineKeyboardBuilder()
     keyboard.add(
         InlineKeyboardButton(text="2$", callback_data="withdraw_2"),
@@ -45,33 +50,42 @@ async def checkout_balance_handler(callback: CallbackQuery):
         InlineKeyboardButton(text="10$", callback_data="withdraw_10"),
         InlineKeyboardButton(text="Ввести сумму", callback_data="withdraw_manual")
     )
-    await callback.message.answer(f"Ваш доступный баланс для вывода: {balance:.2f} USDT\n\nВыберите сумму для вывода:",
-                                  reply_markup=keyboard.as_markup())
-    conn.close()
+
+    text = f"💰 Ваш доступный баланс для вывода: {balance:.2f} USDT\n\nВыберите сумму для вывода:"
+
+    if withdrawal_image:
+        try:
+            media = InputMediaPhoto(media=withdrawal_image, caption=text, parse_mode="HTML")
+            await callback.message.edit_media(media=media, reply_markup=keyboard.as_markup())
+        except TelegramBadRequest:
+            await callback.message.answer_photo(photo=withdrawal_image, caption=text, reply_markup=keyboard.as_markup())
+    else:
+        # Если изображения нет, отправляем просто текст
+        await callback.message.answer(text, reply_markup=keyboard.as_markup())
 
 
 @router.callback_query(lambda c: c.data.startswith("withdraw_"))
 async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
     telegram_id = callback.from_user.id
-    username = callback.from_user.username or f"ID: {telegram_id}"  # Берем username или ID
+    username = callback.from_user.username or f"ID: {telegram_id}"
 
-    # Определяем сумму на основании callback_data
     data = callback.data
-    if data == "withdraw_2":
-        amount = 2.0
-    elif data == "withdraw_5":
-        amount = 5.0
-    elif data == "withdraw_10":
-        amount = 10.0
-    elif data == "withdraw_manual":
+    amount_dict = {
+        "withdraw_2": 2.0,
+        "withdraw_5": 5.0,
+        "withdraw_10": 10.0
+    }
+
+    amount = amount_dict.get(data)
+
+    if data == "withdraw_manual":
         await callback.message.answer("Введите сумму для вывода (в USDT):")
         await state.set_state(WithdrawStates.waiting_for_amount)
         return
-    else:
+    elif amount is None:
         await callback.answer("Неверная команда.", show_alert=True)
         return
 
-    # Подключаемся к БД и проверяем баланс
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT balance FROM user WHERE telegram_id = ?", (telegram_id,))
@@ -83,21 +97,21 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
         return
 
     balance = result[0]
+    withdrawal_image = get_menu_image("withdraw")
+    channel_id = -1002453573888  # ID канала логов
 
     if balance < amount:
-        await callback.answer("Недостаточно средств для вывода.", show_alert=True)
+        await callback.answer("❌ Недостаточно средств для вывода.", show_alert=True)
         conn.close()
 
-        # Логируем попытку вывода в канал
-        channel_id = -1002453573888
         log_message = (f"🚨 *Попытка вывода отклонена!*\n"
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Недостаточно средств (Баланс: {balance:.2f} USDT)")
-        await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
+        await send_log_with_image(callback.bot, channel_id, withdrawal_image, log_message)
         return
 
-    # Обновляем баланс
     new_balance = balance - amount
     cursor.execute("UPDATE user SET balance = ? WHERE telegram_id = ?", (new_balance, telegram_id))
     conn.commit()
@@ -108,26 +122,21 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         await callback.message.answer("Ошибка при создании чека")
 
-        # Логируем ошибку создания чека
-        channel_id = -1002453573888
         log_message = (f"🚨 *Ошибка вывода!*\n"
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Ошибка при создании чека")
-        await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
+        await send_log_with_image(callback.bot, channel_id, withdrawal_image, log_message)
         return
 
-    # Извлекаем ссылку на чек
     check_str = str(check)
     pattern = r"bot_check_url='([^']+)'"
     match = re.search(pattern, check_str)
 
-    if match:
-        link = match.group(1)
-    else:
-        link = "Не удалось найти ссылку"
+    link = match.group(1) if match else "Не удалось найти ссылку"
 
-    # Клавиатура с кнопкой "Получить"
+    # Отправка чека пользователю
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Получить", url=link))
 
@@ -136,20 +145,29 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
         f"💰 Сумма: {amount:.2f} USDT\n"
         f"🆔 Чек ID: {check.check_id}\n"
     )
-
     await callback.message.answer(response_text, reply_markup=kb.as_markup())
 
-    # Логируем успешный вывод в канал
-    channel_id = -1002453573888
+    # Лог в канал
     log_message = (f"✅ *Вывод успешно создан!*\n"
                    f"👤 Игрок: @{username}\n"
                    f"💰 Сумма: {amount:.2f} USDT\n"
                    f"🔗 [Ссылка на чек]({link})")
-    await callback.bot.send_message(channel_id, log_message, parse_mode="Markdown")
 
-    # Удаляем сообщение через 15 секунд
+    await send_log_with_image(callback.bot, channel_id, withdrawal_image, log_message)
+
     await asyncio.sleep(15)
     await callback.message.delete()
+
+
+async def send_log_with_image(bot, channel_id, image, text):
+    """Отправка логов с картинкой, если доступно"""
+    try:
+        if image:
+            await bot.send_photo(channel_id, photo=image, caption=text)
+        else:
+            await bot.send_message(channel_id, text)
+    except TelegramBadRequest:
+        await bot.send_message(channel_id, text)
 
 
 @router.message(WithdrawStates.waiting_for_amount)
@@ -180,21 +198,26 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
 
     balance = result[0]
 
+    withdrawal_image = get_menu_image("withdraw")
+    channel_id = -1002453573888  # ID канала логов
+
     if balance < amount:
-        await message.answer("Недостаточно средств для вывода.")
+        await message.answer("❌ Недостаточно средств для вывода.")
         conn.close()
         await state.clear()
 
-        # Логируем попытку вывода в канал
-        channel_id = -1002453573888
         log_message = (f"🚨 *Попытка вывода отклонена!*\n"
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Недостаточно средств (Баланс: {balance:.2f} USDT)")
-        await message.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
+        try:
+            await message.bot.send_photo(channel_id, photo=withdrawal_image, caption=log_message)
+        except TelegramBadRequest:
+            await message.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
         return
 
-    # Обновляем баланс
     new_balance = balance - amount
     cursor.execute("UPDATE user SET balance = ? WHERE telegram_id = ?", (new_balance, telegram_id))
     conn.commit()
@@ -206,16 +229,18 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
         await message.answer("Ошибка при создании чека")
         await state.clear()
 
-        # Логируем ошибку создания чека
-        channel_id = -1002453573888
         log_message = (f"🚨 *Ошибка вывода!*\n"
                        f"👤 Игрок: @{username}\n"
                        f"💰 Запрошено: {amount:.2f} USDT\n"
                        f"❌ Причина: Ошибка при создании чека")
-        await message.bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
+        try:
+            await message.bot.send_photo(channel_id, photo=withdrawal_image, caption=log_message)
+        except TelegramBadRequest:
+            await message.bot.send_message(channel_id, log_message)
+
         return
 
-    # Извлекаем ссылку на чек
     check_str = str(check)
     pattern = r"bot_check_url='([^']+)'"
     match = re.search(pattern, check_str)
@@ -225,9 +250,8 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
     else:
         link = "Не удалось найти ссылку"
 
-    # Клавиатура с кнопкой "Получить"
     kb = InlineKeyboardBuilder()
-    kb.add(InlineKeyboardButton(text='Получить', url=link))
+    kb.add(InlineKeyboardButton(text="Получить", url=link))
 
     response_text = (
         "✅ Чек успешно создан!\n"
@@ -237,15 +261,16 @@ async def process_manual_withdraw(message: Message, state: FSMContext):
 
     await message.answer(response_text, reply_markup=kb.as_markup())
 
-    # Логируем успешный вывод в канал
-    channel_id = -1002453573888
     log_message = (f"✅ *Вывод успешно создан!*\n"
                    f"👤 Игрок: @{username}\n"
                    f"💰 Сумма: {amount:.2f} USDT\n"
                    f"🔗 [Ссылка на чек]({link})")
-    await message.bot.send_message(channel_id, log_message)
 
-    # Очищаем состояние и удаляем сообщение через 15 секунд
+    try:
+        await message.bot.send_photo(channel_id, photo=withdrawal_image, caption=log_message)
+    except TelegramBadRequest:
+        await message.bot.send_message(channel_id, log_message)
+
     await state.clear()
     await asyncio.sleep(15)
     await message.delete()

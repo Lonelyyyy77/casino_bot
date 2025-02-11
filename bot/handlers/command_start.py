@@ -5,6 +5,7 @@ from lib2to3.fixes.fix_print import parend_expr
 from typing import Union
 
 from aiogram import Router, types
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart, Command
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -109,11 +110,12 @@ async def start_handler(message: types.Message):
         await message.answer(
             "<b>Нажимая кнопку ниже, вы соглашаетесь с правилами:</b>\n\n"
             "<b>1) Запрещены мульти-аккаунты!</b>\n"
-            "<b>2) Запрещены махинации, багаюз!</b>\n"
+            "<b>2) Запрещены махинации, багоюз!</b>\n"
             "<b>3) Запрещён обман администрации!</b>\n\n"
             "<b><a href='https://telegra.ph/LICENZIONNOE-SOGLAShENIE-WIN-SHARK-01-09'>ЛИЦЕНЗИОННОЕ СОГЛАСШЕНИЕ</a>🧾</b>",
             reply_markup=kb.as_markup(),
-            parse_mode="HTML"
+            parse_mode="HTML",
+            link_preview_options=None
         )
         return
 
@@ -152,7 +154,6 @@ async def accept_rules(callback: types.CallbackQuery):
     conn.commit()
     conn.close()
 
-    await callback.message.delete()
     await start_captcha(callback)
 
 
@@ -179,17 +180,24 @@ async def captcha_handler(callback: types.CallbackQuery):
         conn.commit()
         conn.close()
 
-        await callback.message.delete()
-
-        # (!) Генерируем клавиатуру, передавая user_id напрямую
+        main_menu_image = get_menu_image("home")
         keyboard = await start_keyboard(telegram_id)
-        await callback.message.answer(
-            "Капча успешно пройдена! Добро пожаловать!",
-            reply_markup=keyboard
-        )
+
+        if main_menu_image:
+            try:
+                media = InputMediaPhoto(media=main_menu_image, caption="✅ Капча успешно пройдена! Добро пожаловать!")
+                await callback.message.edit_media(media=media, reply_markup=keyboard)
+            except TelegramBadRequest:
+                await callback.message.answer_photo(photo=main_menu_image, caption="✅ Капча успешно пройдена! Добро пожаловать!", reply_markup=keyboard)
+        else:
+            try:
+                await callback.message.edit_text("✅ Капча успешно пройдена! Добро пожаловать!", reply_markup=keyboard)
+            except TelegramBadRequest:
+                await callback.message.answer("✅ Капча успешно пройдена! Добро пожаловать!", reply_markup=keyboard)
     else:
         conn.close()
         await callback.answer("Неправильный выбор. Попробуйте ещё раз.", show_alert=True)
+
 
 
 async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
@@ -221,9 +229,9 @@ async def start_captcha(source: Union[types.CallbackQuery, types.Message]):
 
     caption_text = f"Для подтверждения, выберите правильный фрукт: {selected_fruit}"
     if isinstance(source, types.CallbackQuery):
-        await source.message.answer(caption_text, reply_markup=kb.as_markup())
+        await source.message.edit_text(caption_text, reply_markup=kb.as_markup())
     elif isinstance(source, types.Message):
-        await source.answer(caption_text, reply_markup=kb.as_markup())
+        await source.edit_text(caption_text, reply_markup=kb.as_markup())
 
 
 @router.callback_query(lambda c: c.data == 'home')

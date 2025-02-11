@@ -1,8 +1,10 @@
 from aiogram import Router, types
-from aiogram.types import InlineKeyboardButton
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import InlineKeyboardButton, InputMediaPhoto, InputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database.admin.admin import is_admin, get_user_statistics
+from bot.database.user.user import get_menu_image
 
 router = Router()
 
@@ -29,12 +31,29 @@ async def admin_panel(callback: types.CallbackQuery):
     kb.row(InlineKeyboardButton(text="💰 Настроить реферальный процент", callback_data="adjust_referral_percent"))
     kb.row(InlineKeyboardButton(text='⚙️ Установить процент выигрыша', callback_data='set_global_percentage'))
     kb.row(InlineKeyboardButton(text='🖼 Установить картинку для меню', callback_data='admin_set_image'))
+    kb.row(InlineKeyboardButton(text="🎟 Создать промокод", callback_data="create_promo"))
     kb.row(InlineKeyboardButton(text="🔙 Назад", callback_data='home'))
 
-    if callback.message.text:
-        await callback.message.edit_text(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
-    elif callback.message.photo:
-        await callback.message.delete()
+    # Получаем изображение из базы
+    admin_panel_image = get_menu_image("panel")
+
+    if admin_panel_image:
+        try:
+            if isinstance(admin_panel_image, str):  # Если это URL или файл
+                photo = admin_panel_image
+            else:
+                photo = InputFile(admin_panel_image)
+
+            if callback.message.photo:
+                media = InputMediaPhoto(media=photo, caption=stats_message, parse_mode="HTML")
+                await callback.message.edit_media(media=media, reply_markup=kb.as_markup())
+            else:
+                await callback.message.delete()
+                await callback.message.answer_photo(photo=photo, caption=stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+        except TelegramBadRequest:
+            await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+    else:
         await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+
 
 

@@ -2,8 +2,10 @@ import asyncio
 import logging
 import sqlite3
 from aiogram import types, Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import LabeledPrice, InlineKeyboardButton, PreCheckoutQuery, CallbackQuery, Message
+from aiogram.types import LabeledPrice, InlineKeyboardButton, PreCheckoutQuery, CallbackQuery, Message, InputFile, \
+    InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiocryptopay import AioCryptoPay, Networks
@@ -11,7 +13,7 @@ from aiohttp import web
 from aiocryptopay.models.update import Update
 
 from bot.database import DB_NAME
-from bot.database.user.user import update_user_balance
+from bot.database.user.user import update_user_balance, get_menu_image
 from bot.start_bot import bot, crypto_bot_token
 from bot.states.user.user import PaymentState
 
@@ -36,6 +38,7 @@ def choose_amount_payment_kb():
     builder.row(InlineKeyboardButton(text="2 JPC (2$)", callback_data="jpc_2"))
     builder.row(InlineKeyboardButton(text="5 JPC (5$)", callback_data="jpc_5"))
     builder.row(InlineKeyboardButton(text="10 JPC (10$)", callback_data="jpc_10"))
+    builder.row(InlineKeyboardButton(text="Ввести вручную", callback_data="custom_jpc"))
     return builder.as_markup()
 
 
@@ -127,16 +130,48 @@ async def notify_referrer_about_referral(bot, referrer_telegram_id, referral_nam
 
 @router.callback_query(lambda c: c.data == 'replenish')
 async def replenish(callback: CallbackQuery):
-    await callback.message.edit_text(
-        "Выберите, сколько JPC вы хотите пополнить:",
-        reply_markup=choose_amount_payment_kb()
-    )
+    replenish_image = get_menu_image("replenish")
+
+    text = "💰 Выберите, сколько JPC вы хотите пополнить:"
+    keyboard = choose_amount_payment_kb()
+
+    if replenish_image:
+        if isinstance(replenish_image, str):
+            photo = replenish_image
+        else:
+            photo = InputFile(replenish_image)
+
+        try:
+            media = InputMediaPhoto(media=photo, caption=text, parse_mode="HTML")
+            await callback.message.edit_media(media=media, reply_markup=keyboard)
+        except TelegramBadRequest:
+            await callback.message.delete()
+            await callback.message.answer_photo(photo=photo, caption=text, reply_markup=keyboard, parse_mode="HTML")
+    else:
+        # Если фото нет, просто отправляем текст
+        await callback.message.answer(text, reply_markup=keyboard, parse_mode="HTML")
 
 
 @router.callback_query(lambda c: c.data == "custom_jpc")
 async def custom_jpc(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("Введите количество JPC, которое вы хотите пополнить (минимум 2 JPC):")
+    text = "💰 Введите количество JPC, которое вы хотите пополнить (минимум 2 JPC):"
     await state.set_state(PaymentState.waiting_for_jpc)
+
+    replenish_image = get_menu_image("replenish")
+
+    if replenish_image:
+        if isinstance(replenish_image, str):
+            photo = replenish_image
+        else:
+            photo = InputFile(replenish_image)
+
+        try:
+            media = InputMediaPhoto(media=photo, caption=text, parse_mode="HTML")
+            await callback.message.edit_media(media=media)
+        except TelegramBadRequest:
+            await callback.message.answer_photo(photo=photo, caption=text, parse_mode="HTML")
+    else:
+        await callback.message.edit_text(text, parse_mode="HTML")
 
 
 @router.message(PaymentState.waiting_for_jpc)
@@ -144,20 +179,41 @@ async def process_custom_jpc(message: types.Message, state: FSMContext):
     try:
         jpc_amount = int(message.text)
         if jpc_amount < 2:
-            await message.answer("Минимум для пополнения - 2 JPC. Попробуйте снова.")
+            await message.answer("❌ Минимум для пополнения - 2 JPC. Попробуйте снова.")
             return
 
-        stars_needed = jpc_amount / STARS_RATE  # вычисляем эквивалент в "звёздах"
+        stars_needed = jpc_amount / STARS_RATE
+
         await state.update_data(jpc_amount=jpc_amount, stars_needed=stars_needed)
-        await message.answer(
-            f"Вы выбрали пополнение на {jpc_amount} JPC ({jpc_amount}$). Это эквивалентно {stars_needed:.2f} звёзд. Подтвердите, пожалуйста.",
-            reply_markup=InlineKeyboardBuilder().add(
-                InlineKeyboardButton(text="Подтвердить", callback_data="confirm_payment")
-            ).as_markup()
+
+        text = (
+            f"💰 Вы выбрали пополнение на {jpc_amount} JPC ({jpc_amount}$).\n"
+            f"⭐ Это эквивалентно {stars_needed:.2f} звёзд.\n\n"
+            "Выберите способ оплаты:"
         )
-        await state.clear()
+
+        kb = InlineKeyboardBuilder()
+        kb.add(InlineKeyboardButton(text="Оплатить через звезды", callback_data="confirm_payment"))
+        kb.add(InlineKeyboardButton(text="Оплатить через крипто бот", callback_data="confirm_payment_crypto_bot"))
+
+        replenish_image = get_menu_image("replenish")
+
+        if replenish_image:
+            if isinstance(replenish_image, str):
+                photo = replenish_image
+            else:
+                photo = InputFile(replenish_image)
+
+            try:
+                media = InputMediaPhoto(media=photo, caption=text, parse_mode="HTML")
+                await message.edit_media(media=media, reply_markup=kb.as_markup())
+            except TelegramBadRequest:
+                await message.answer_photo(photo=photo, caption=text, reply_markup=kb.as_markup(), parse_mode="HTML")
+        else:
+            await message.answer(text, reply_markup=kb.as_markup(), parse_mode="HTML")
+
     except ValueError:
-        await message.answer("Пожалуйста, введите корректное количество JPC (число). Попробуйте снова.")
+        await message.answer("❌ Пожалуйста, введите корректное количество JPC (число). Попробуйте снова.")
 
 
 @router.callback_query(lambda c: c.data.startswith('jpc_'))
@@ -180,16 +236,29 @@ async def handle_jpc_choice(callback: CallbackQuery, state: FSMContext):
 
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Оплатить звездами (Telegram Pay)", callback_data="confirm_payment_stars"))
-    kb.add(InlineKeyboardButton(text="Оплатить через Crypto Bot", callback_data="confirm_payment_crypto_bot"))
+    kb.row(InlineKeyboardButton(text="Оплатить через Crypto Bot", callback_data="confirm_payment_crypto_bot"))
 
-    await callback.message.answer(
-        (
-            f"Вы выбрали пополнение на {jpc_amount} JPC (это {jpc_amount}$).\n"
-            f"Эквивалентно ~{stars_needed:.2f} звёзд.\n\n"
-            "Выберите способ оплаты:"
-        ),
-        reply_markup=kb.as_markup()
+    text = (
+        f"💰 Вы выбрали пополнение на {jpc_amount} JPC (это {jpc_amount}$).\n"
+        f"⭐ Эквивалентно ~{stars_needed:.2f} звёзд.\n\n"
+        "Выберите способ оплаты:"
     )
+
+    replenish_image = get_menu_image("replenish")
+
+    if replenish_image:
+        if isinstance(replenish_image, str):
+            photo = replenish_image
+        else:
+            photo = InputFile(replenish_image)
+
+        try:
+            media = InputMediaPhoto(media=photo, caption=text, parse_mode="HTML")
+            await callback.message.edit_media(media=media, reply_markup=kb.as_markup())
+        except TelegramBadRequest:
+            await callback.message.edit_text(text, reply_markup=kb.as_markup(), parse_mode="HTML")
+    else:
+        await callback.message.edit_text(text, reply_markup=kb.as_markup(), parse_mode="HTML")
 
 
 @router.callback_query(lambda c: c.data == "confirm_payment_crypto_bot")
@@ -199,16 +268,27 @@ async def handle_crypto_payment(callback: CallbackQuery, state: FSMContext):
     выдаём пользователю ссылку для оплаты и запускаем фоновую задачу для проверки платежа.
     """
     data = await state.get_data()
-    jpc_amount = data.get('jpc_amount', 0)
-    user_id = callback.from_user.id
+    jpc_amount = data.get('jpc_amount')
 
-    if float(jpc_amount) < 1 and str(jpc_amount) != '0.1':
+    # Проверка, что jpc_amount существует
+    if jpc_amount is None:
+        await callback.message.answer("❌ Ошибка: сумма пополнения не найдена. Выберите сумму заново.")
+        return
+
+    try:
+        jpc_amount = float(jpc_amount)  # Преобразуем в число
+    except ValueError:
+        await callback.message.answer("❌ Ошибка: неверное значение суммы. Попробуйте снова.")
+        return
+
+    # Проверка минимальной суммы
+    if jpc_amount < 1.0 and jpc_amount != 0.1:
         await callback.message.answer("Минимальная сумма для оплаты через USDT или TON — 1 USD.")
         return
 
     try:
         invoice = await crypto.create_invoice(
-            amount=float(jpc_amount),
+            amount=jpc_amount,
             fiat='USD',
             currency_type='fiat'
         )
@@ -216,6 +296,7 @@ async def handle_crypto_payment(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(f"Ошибка при создании инвойса: {e}")
         return
 
+    # Записываем инвойс в базу
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -223,7 +304,7 @@ async def handle_crypto_payment(callback: CallbackQuery, state: FSMContext):
         INSERT INTO payments (invoice_id, user_id, jpc_amount, status)
         VALUES (?, ?, ?, ?)
         """,
-        (invoice.invoice_id, user_id, jpc_amount, 'pending')
+        (invoice.invoice_id, callback.from_user.id, jpc_amount, 'pending')
     )
     conn.commit()
     conn.close()
@@ -236,7 +317,8 @@ async def handle_crypto_payment(callback: CallbackQuery, state: FSMContext):
         "После оплаты баланс будет пополнен автоматически.",
         reply_markup=kb.as_markup()
     )
-    asyncio.create_task(check_payment_crypto_bot(user_id, invoice.invoice_id, jpc_amount))
+
+    asyncio.create_task(check_payment_crypto_bot(callback.from_user.id, invoice.invoice_id, jpc_amount))
 
 
 @router.callback_query(lambda c: c.data == 'confirm_payment_stars')
@@ -273,53 +355,70 @@ async def process_successful_payment(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
     jpc_amount = user_data.get("jpc_amount")
     if not jpc_amount:
-        await message.answer("Ошибка: не удалось определить сумму пополнения. Обратитесь к администрации.")
+        await message.answer("❌ Ошибка: не удалось определить сумму пополнения. Обратитесь к администрации.")
         return
 
-    # Начисляем баланс пользователю (функция update_user_balance должна корректно обрабатывать идентификатор)
-    update_user_balance(telegram_id=message.from_user.id, jpc_amount=jpc_amount)
+    telegram_id = message.from_user.id
+    update_user_balance(telegram_id=telegram_id, jpc_amount=jpc_amount)
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+
     try:
-        cursor.execute("SELECT id, balance FROM user WHERE telegram_id = ?", (message.from_user.id,))
+        cursor.execute("SELECT id, balance FROM user WHERE telegram_id = ?", (telegram_id,))
         user_row = cursor.fetchone()
         if not user_row:
-            await message.answer("Пользователь не найден в базе данных.")
+            await message.answer("❌ Пользователь не найден в базе данных.")
             return
 
         user_id, current_balance = user_row
-        # Получаем данные реферала по внутреннему id
+
         cursor.execute("SELECT referrer_id, referral_percent FROM user WHERE id = ?", (user_id,))
         ref_data = cursor.fetchone()
-        if not ref_data or not ref_data[0]:
-            await message.answer(f"Платеж успешен! Вам начислено {jpc_amount} JPC. Спасибо за пополнение!")
-            return
 
-        referrer_id, referral_percent = ref_data
-        cursor.execute("SELECT telegram_id FROM user WHERE id = ?", (referrer_id,))
-        referrer_telegram_data = cursor.fetchone()
-        if not referrer_telegram_data:
-            print(f"Проблема: Referrer {referrer_id} не найден в таблице user.")
-            await message.answer(f"Платеж успешен! Вам начислено {jpc_amount} JPC. Спасибо за пополнение!")
-            return
+        if ref_data and ref_data[0]:
+            referrer_id, referral_percent = ref_data
+            cursor.execute("SELECT telegram_id FROM user WHERE id = ?", (referrer_id,))
+            referrer_telegram_data = cursor.fetchone()
 
-        referrer_telegram_id = referrer_telegram_data[0]
-        referral_reward = jpc_amount * (referral_percent / 100.0)
-        await notify_referrer_about_referral(
-            bot=message.bot,
-            referrer_telegram_id=referrer_telegram_id,
-            referral_name=message.from_user.first_name,
-            deposit_amount=jpc_amount,
-            referral_reward=referral_reward
-        )
+            if referrer_telegram_data:
+                referrer_telegram_id = referrer_telegram_data[0]
+                referral_reward = jpc_amount * (referral_percent / 100.0)
 
-        await message.answer(f"Платеж успешен! Вам начислено {jpc_amount} JPC. Спасибо за пополнение!")
+                await notify_referrer_about_referral(
+                    bot=message.bot,
+                    referrer_telegram_id=referrer_telegram_id,
+                    referral_name=message.from_user.first_name,
+                    deposit_amount=jpc_amount,
+                    referral_reward=referral_reward
+                )
+
+        await message.answer(f"✅ Платеж успешен! Вам начислено {jpc_amount} JPC. Спасибо за пополнение!")
+
     except Exception as e:
-        print(f"Ошибка при обработке рефералов: {e}")
-        await message.answer("Произошла ошибка во время обработки реферальных данных. Обратитесь к администрации.")
+        print(f"❌ Ошибка при обработке рефералов: {e}")
+        await message.answer("❌ Произошла ошибка во время обработки реферальных данных. Обратитесь к администрации.")
     finally:
         conn.close()
+
+    channel_id = -1002453573888
+    username = message.from_user.username or f"ID: {telegram_id}"
+
+    log_message = (f"💰 *Пополнение через Telegram Pay!*\n"
+                   f"👤 Игрок: @{username}\n"
+                   f"💳 Сумма: {jpc_amount:.2f} JPC\n"
+                   f"✅ Статус: Успешно")
+
+    replenish_image = get_menu_image("replenish")
+    if replenish_image:
+        if isinstance(replenish_image, str):
+            photo = replenish_image
+        else:
+            photo = InputFile(replenish_image)
+
+        await message.bot.send_photo(channel_id, photo=photo, caption=log_message)
+    else:
+        await message.bot.send_message(channel_id, log_message)
 
 
 async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
@@ -330,6 +429,16 @@ async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
     """
     channel_id = -1002453573888  # Канал для логирования
     username = (await bot.get_chat(user_id)).username or f"ID: {user_id}"  # Получаем юзернейм
+
+    # Загружаем изображение для логов пополнения
+    replenish_image = get_menu_image("replenish")
+    if replenish_image:
+        if isinstance(replenish_image, str):
+            photo = replenish_image
+        else:
+            photo = InputFile(replenish_image)
+    else:
+        photo = None  # Если картинки нет, отправится только текст
 
     for _ in range(60):
         await asyncio.sleep(5)
@@ -387,28 +496,34 @@ async def check_payment_crypto_bot(user_id, invoice_id, jpc_amount):
                     conn.close()
 
                 await bot.send_message(user_id, f"✅ Ваш баланс пополнен на {jpc_amount} JPC!")
+
                 log_message = (f"💰 *Пополнение баланса!*\n"
                                f"👤 Игрок: @{username}\n"
                                f"💳 Сумма: {jpc_amount:.2f} JPC\n"
                                f"🆔 Invoice ID: `{invoice_id}`\n"
                                f"✅ Статус: Успешно")
 
-                await bot.send_message(channel_id, log_message)
+                if photo:
+                    await bot.send_photo(channel_id, photo=photo, caption=log_message)
+                else:
+                    await bot.send_message(channel_id, log_message)
                 return
 
         except Exception as e:
             logging.error(f"Ошибка при проверке оплаты: {e}")
 
-    # Если оплата не прошла за 5 минут
     await bot.send_message(user_id, "❌ Время оплаты истекло.")
 
-    # Логируем неудачную оплату в канал
     log_message = (f"⚠️ *Оплата не завершена!*\n"
                    f"👤 Игрок: @{username}\n"
                    f"💳 Сумма: {jpc_amount:.2f} JPC\n"
                    f"🆔 Invoice ID: `{invoice_id}`\n"
                    f"❌ Статус: Время истекло")
-    await bot.send_message(channel_id, log_message, parse_mode="Markdown")
+
+    if photo:
+        await bot.send_photo(channel_id, photo=photo, caption=log_message)
+    else:
+        await bot.send_message(channel_id, log_message)
 
 
 @crypto.pay_handler()

@@ -451,6 +451,7 @@ async def process_bet_input(message: types.Message, state: FSMContext):
     await state.clear()
 
 
+
 @router.callback_query(lambda c: c.data == 'reset_bet')
 async def reset_bet(callback: CallbackQuery):
     telegram_id = callback.from_user.id
@@ -460,7 +461,18 @@ async def reset_bet(callback: CallbackQuery):
     conn.commit()
 
     kb = get_game_keyboard(default_bet)
-    await callback.message.edit_text(f"Ставка сброшена: {default_bet:.1f} USDT", reply_markup=kb)
+    text = f"🎰 <b>Ставка сброшена:</b> {default_bet:.1f} USDT"
+    games_image = get_menu_image("games")
+
+    try:
+        if games_image:
+            media = InputMediaPhoto(media=games_image, caption=text, parse_mode="HTML")
+            await callback.message.edit_media(media, reply_markup=kb)
+        else:
+            await callback.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
+    except Exception as e:
+        print(f"Ошибка при редактировании сообщения: {e}")
+
     await callback.answer()
 
 

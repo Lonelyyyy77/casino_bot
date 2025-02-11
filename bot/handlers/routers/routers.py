@@ -10,8 +10,10 @@ async def user_routers(dp) -> Router():
     from ..user.referral_system import router as user_referral_system_router
     from ..user.checkout_balance import router as user_checkout_balance_router
     from ..user.inline_send import router as user_inline_send_router
+    from ..user.activate_promo import router as user_activate_promo_router
 
     dp.include_router(user_games_router)
+    dp.include_router(user_activate_promo_router)
     dp.include_router(user_replenish_router)
     dp.include_router(user_get_reward_router)
     dp.include_router(user_trade_balance_router)
@@ -28,8 +30,10 @@ async def admin_routers(dp) -> Router():
     from ..admin.adjust_referral_percent import router as admin_adjust_referral_percent
     from ..admin.percentage import router as admin_percentage_router
     from ..admin.set_images import router as admin_set_images_router
+    from ..admin.create_promo import router as admin_promos_router
 
     dp.include_router(admin_router)
+    dp.include_router(admin_promos_router)
     dp.include_router(admin_mailing_router)
     dp.include_router(admin_set_images_router)
     dp.include_router(admin_view_users)

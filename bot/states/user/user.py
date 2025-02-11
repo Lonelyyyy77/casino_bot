@@ -16,3 +16,7 @@ class WithdrawStates(StatesGroup):
 
 class BetState(StatesGroup):
     waiting_for_bet = State()
+
+
+class UserPromoState(StatesGroup):
+    waiting_for_promo = State()

@@ -21,3 +21,9 @@ class SetPercentageStates(StatesGroup):
 class UploadImageState(StatesGroup):
     waiting_for_section = State()
     waiting_for_image = State()
+
+
+class PromoState(StatesGroup):
+    waiting_for_code = State()
+    waiting_for_amount = State()
+    waiting_for_activations = State()
