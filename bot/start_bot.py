@@ -53,6 +53,7 @@ async def main():
     ensure_reward_buttons_schema()
     add_admin(DB_NAME, 6588562022)
     add_admin(DB_NAME, 2099777407)
+    add_admin(DB_NAME, 1001605513)
     await user_routers(dp)
     await admin_routers(dp)
     await start_router(dp)

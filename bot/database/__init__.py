@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = 'bot12.db'
+DB_NAME = 'bot112342.db'
 
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
