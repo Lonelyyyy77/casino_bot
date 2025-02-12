@@ -2,6 +2,7 @@ import asyncio
 import sqlite3
 
 from aiogram import Router, types
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -21,21 +22,42 @@ cursor = conn.cursor()
 async def games(callback: CallbackQuery):
     telegram_id = callback.from_user.id
 
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
     cursor.execute("SELECT balance, current_bet, total_bets FROM user WHERE telegram_id = ?", (telegram_id,))
     user_data_bet = cursor.fetchone()
 
-    games_image = get_menu_image("games")
+    # 🔥 Проверка, существует ли пользователь в базе
+    if not user_data_bet:
+        await callback.answer("⚠️ Ошибка: ваш профиль не найден! Попробуйте снова или зарегистрируйтесь.", show_alert=True)
+        conn.close()
+        return
 
+    balance, current_bet, total_bets = user_data_bet  # Распаковка данных
+
+    # 🔥 Проверяем, есть ли ставка (чтобы избежать ошибки)
+    current_bet = current_bet or 0  # Если `None`, то ставим `0` по умолчанию
+
+    games_image = get_menu_image("games")
     text = "🎮 <b>Выберите игру:</b>"
 
-    keyboard = get_game_keyboard(current_bet=user_data_bet[1])
+    keyboard = get_game_keyboard(current_bet=current_bet)
+
+    conn.close()
 
     if games_image:
         media = InputMediaPhoto(media=games_image, caption=text, parse_mode="HTML")
-        await callback.message.edit_media(media, reply_markup=keyboard)
+        try:
+            await callback.message.edit_media(media, reply_markup=keyboard)
+        except TelegramBadRequest:
+            await callback.message.answer_photo(photo=games_image, caption=text, reply_markup=keyboard, parse_mode="HTML")
     else:
-        # Если изображения нет, редактируем только текст
-        await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+        try:
+            await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+        except TelegramBadRequest:
+            await callback.message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+
 
 
 @router.callback_query(

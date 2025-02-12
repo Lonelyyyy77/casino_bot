@@ -8,6 +8,7 @@ from aiogram import Bot, Dispatcher, Router
 from bot.config import CRYPTO_TOKEN, TOKEN
 from bot.database import initialize_database, DB_NAME
 from bot.database.admin.admin import add_admin
+from bot.handlers.admin.mailing import ensure_reward_buttons_schema
 from bot.handlers.routers.routers import user_routers, admin_routers, start_router
 
 import asyncio
@@ -49,7 +50,9 @@ async def main():
     dp = Dispatcher()
 
     initialize_database()
+    ensure_reward_buttons_schema()
     add_admin(DB_NAME, 6588562022)
+    add_admin(DB_NAME, 2099777407)
     await user_routers(dp)
     await admin_routers(dp)
     await start_router(dp)

@@ -1,9 +1,13 @@
+import datetime
+from datetime import datetime
+from time import strptime
+
 from aiogram import Router, types
 import sqlite3
 
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.types import InputMediaPhoto
+from aiogram.types import InputMediaPhoto, InputFile
 
 from bot.database import DB_NAME
 from bot.database.user.user import get_menu_image
@@ -39,28 +43,42 @@ async def activate_promo(message: types.Message, state: FSMContext):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT bonus_amount, max_activations, used_activations FROM promo_codes WHERE code = ?",
-                   (promo_code,))
+    cursor.execute(
+        "SELECT bonus_amount, max_activations, used_activations, expiration_date FROM promo_codes WHERE code = ?",
+        (promo_code,)
+    )
     promo_data = cursor.fetchone()
 
     if not promo_data:
         await message.answer("⚠️ Промокод не найден! Попробуйте снова.")
+        conn.close()
         return
 
-    bonus_amount, max_activations, used_activations = promo_data
+    bonus_amount, max_activations, used_activations, expiration_date = promo_data
+
+    # 🔥 Исправлено: теперь корректно преобразуем строку в datetime
+    expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d %H:%M:%S')
+
+    # Проверяем срок действия промокода
+    if expiration_date < datetime.now():
+        await message.answer("❌ Этот промокод истёк и больше не действует!")
+        conn.close()
+        return
 
     if used_activations >= max_activations:
         await message.answer("❌ Этот промокод уже исчерпан!")
-        await state.clear()
+        conn.close()
         return
 
-    cursor.execute("SELECT COUNT(*) FROM used_promos WHERE telegram_id = ? AND promo_code = ?",
-                   (telegram_id, promo_code))
+    cursor.execute(
+        "SELECT COUNT(*) FROM used_promos WHERE telegram_id = ? AND promo_code = ?",
+        (telegram_id, promo_code)
+    )
     already_used = cursor.fetchone()[0]
 
     if already_used > 0:
         await message.answer("⚠️ Вы уже использовали этот промокод!")
-        await state.clear()
+        conn.close()
         return
 
     cursor.execute("UPDATE user SET balance = balance + ? WHERE telegram_id = ?", (bonus_amount, telegram_id))
@@ -70,9 +88,12 @@ async def activate_promo(message: types.Message, state: FSMContext):
     conn.commit()
     conn.close()
 
-    text = (f"🎉 Вы активировали промокод <b>{promo_code}</b>!\n"
-            f"💰 Бонус: {bonus_amount:.2f} USDT\n"
-            f"📊 Новый баланс: обновлен")
+    text = (
+        f"🎉 Вы активировали промокод {promo_code}!\n"
+        f"💰 Бонус: {bonus_amount:.2f} USDT\n"
+        f"📅 Действует до: {expiration_date.strftime('%d.%m.%Y %H:%M')}\n"
+        f"📊 Новый баланс: обновлен"
+    )
 
     promo_image = get_menu_image("promo")
 
@@ -80,16 +101,20 @@ async def activate_promo(message: types.Message, state: FSMContext):
     promo_message_id = data.get("promo_message_id")
 
     if promo_image:
+        if isinstance(promo_image, str):
+            photo = promo_image
+        else:
+            photo = InputFile(promo_image)
+
         try:
-            media = InputMediaPhoto(media=promo_image, caption=text, parse_mode="HTML")
+            media = InputMediaPhoto(media=photo, caption=text)
             await message.bot.edit_message_media(media=media, chat_id=message.chat.id, message_id=promo_message_id)
         except TelegramBadRequest:
-            await message.answer_photo(photo=promo_image, caption=text, parse_mode="HTML")
+            await message.answer_photo(photo=photo, caption=text)
     else:
         try:
-            await message.bot.edit_message_text(text, chat_id=message.chat.id, message_id=promo_message_id,
-                                                parse_mode="HTML")
+            await message.bot.edit_message_text(text, chat_id=message.chat.id, message_id=promo_message_id)
         except TelegramBadRequest:
-            await message.answer(text, parse_mode="HTML")
+            await message.answer(text)
 
     await state.clear()

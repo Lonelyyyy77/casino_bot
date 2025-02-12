@@ -188,7 +188,9 @@ async def captcha_handler(callback: types.CallbackQuery):
                 media = InputMediaPhoto(media=main_menu_image, caption="✅ Капча успешно пройдена! Добро пожаловать!")
                 await callback.message.edit_media(media=media, reply_markup=keyboard)
             except TelegramBadRequest:
-                await callback.message.answer_photo(photo=main_menu_image, caption="✅ Капча успешно пройдена! Добро пожаловать!", reply_markup=keyboard)
+                await callback.message.answer_photo(photo=main_menu_image,
+                                                    caption="✅ Капча успешно пройдена! Добро пожаловать!",
+                                                    reply_markup=keyboard)
         else:
             try:
                 await callback.message.edit_text("✅ Капча успешно пройдена! Добро пожаловать!", reply_markup=keyboard)
@@ -197,7 +199,6 @@ async def captcha_handler(callback: types.CallbackQuery):
     else:
         conn.close()
         await callback.answer("Неправильный выбор. Попробуйте ещё раз.", show_alert=True)
-
 
 
 async def start_captcha(source: Union[types.CallbackQuery, types.Message]):

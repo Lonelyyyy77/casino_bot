@@ -11,6 +11,21 @@ from ...database import DB_NAME
 router = Router()
 
 
+def ensure_reward_buttons_schema():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(reward_buttons)")
+    columns = [column_info[1] for column_info in cursor.fetchall()]
+    if 'mailing_id' not in columns:
+        try:
+            cursor.execute("ALTER TABLE reward_buttons ADD COLUMN mailing_id INTEGER")
+            conn.commit()
+            print("Столбец mailing_id успешно добавлен в таблицу reward_buttons.")
+        except Exception as e:
+            print("Ошибка при добавлении столбца mailing_id:", e)
+    conn.close()
+
+
 @router.callback_query(lambda c: c.data == 'mailing')
 async def start_mailing(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(MailingState.enter_text)
@@ -72,7 +87,6 @@ async def set_reward_amount(message: types.Message, state: FSMContext):
         await message.answer("Пожалуйста, введите корректное положительное число (например, 1.5).")
 
 
-
 @router.message(MailingState.enter_reward_uses)
 async def set_reward_uses(message: types.Message, state: FSMContext):
     try:
@@ -98,7 +112,8 @@ async def show_preview(message_or_callback, state: FSMContext):
     confirm_buttons.add(InlineKeyboardButton(text="Отослать", callback_data="send_mailing"))
     confirm_buttons.add(InlineKeyboardButton(text="Отменить", callback_data="cancel_mailing"))
     confirm_buttons.row(
-        InlineKeyboardButton(text="Добавить кнопку с вознаграждением", callback_data="add_reward_button"))
+        InlineKeyboardButton(text="Добавить кнопку с вознаграждением", callback_data="add_reward_button")
+    )
 
     if media_id:
         if media_type == "photo":
@@ -117,7 +132,7 @@ async def show_preview(message_or_callback, state: FSMContext):
         await message_or_callback.answer(f"Добавлена кнопка с вознаграждением: {reward_amount} JPC.")
 
 
-@router.callback_query(MailingState.confirm, lambda c: c.data == 'send_mailing')
+@router.callback_query(lambda c: c.data == 'send_mailing')
 async def send_mailing(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     text = data.get('text', 'Текст отсутствует.')
@@ -129,14 +144,27 @@ async def send_mailing(callback: types.CallbackQuery, state: FSMContext):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
+    cursor.execute(
+        "INSERT INTO mailings (text, media_id, media_type, reward_amount, reward_uses) VALUES (?, ?, ?, ?, ?)",
+        (text, media_id, media_type, reward_amount, reward_uses)
+    )
+    mailing_id = cursor.lastrowid
+    conn.commit()
+
+    reward_button_id = None
     if reward_amount and reward_uses:
         cursor.execute(
-            "INSERT INTO reward_buttons (amount, remaining_uses) VALUES (?, ?)",
-            (reward_amount, reward_uses)
+            "INSERT INTO reward_buttons (amount, remaining_uses, mailing_id) VALUES (?, ?, ?)",
+            (reward_amount, reward_uses, mailing_id)
         )
-        button_id = cursor.lastrowid
+        reward_button_id = cursor.lastrowid
+        cursor.execute(
+            "UPDATE mailings SET reward_button_id = ? WHERE id = ?",
+            (reward_button_id, mailing_id)
+        )
         conn.commit()
 
+    # Далее — рассылка сообщений пользователям...
     cursor.execute("SELECT telegram_id FROM user")
     users = cursor.fetchall()
 
@@ -150,7 +178,7 @@ async def send_mailing(callback: types.CallbackQuery, state: FSMContext):
                 reward_button.add(
                     InlineKeyboardButton(
                         text=f"Забрать {reward_amount} JPC, осталось {reward_uses}",
-                        callback_data=f"claim_reward_{button_id}"
+                        callback_data=f"claim_reward_{reward_button_id}"
                     )
                 )
                 reply_markup = reward_button.as_markup()

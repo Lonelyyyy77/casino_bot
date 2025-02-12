@@ -27,3 +27,4 @@ class PromoState(StatesGroup):
     waiting_for_code = State()
     waiting_for_amount = State()
     waiting_for_activations = State()
+    waiting_for_expiration = State()

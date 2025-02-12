@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
@@ -53,23 +54,43 @@ async def get_promo_activations(message: types.Message, state: FSMContext):
         await message.answer("Ошибка! Введите целое число больше 0.")
         return
 
+    await state.update_data(max_activations=max_activations)
+    await message.answer("Введите срок действия промокода в днях (например, 7 для недели):")
+    await state.set_state(PromoState.waiting_for_expiration)
+
+
+@router.message(PromoState.waiting_for_expiration)
+async def get_promo_expiration(message: types.Message, state: FSMContext):
+    try:
+        days_valid = int(message.text)
+        if days_valid < 1:
+            raise ValueError
+    except ValueError:
+        await message.answer("Ошибка! Введите корректное количество дней (целое число больше 0).")
+        return
+
+    expiration_date = datetime.now() + timedelta(days=days_valid)
+
     data = await state.get_data()
     promo_code = data["promo_code"]
     bonus_amount = data["bonus_amount"]
+    max_activations = data["max_activations"]
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     try:
         cursor.execute(
-            "INSERT INTO promo_codes (code, bonus_amount, max_activations) VALUES (?, ?, ?)",
-            (promo_code, bonus_amount, max_activations),
+            "INSERT INTO promo_codes (code, bonus_amount, max_activations, expiration_date) VALUES (?, ?, ?, ?)",
+            (promo_code, bonus_amount, max_activations, expiration_date.strftime('%Y-%m-%d %H:%M:%S')),
         )
         conn.commit()
-        await message.answer(f"✅ Промокод <b>{promo_code}</b> создан!\n"
-                             f"💰 Бонус: {bonus_amount:.2f} USDT\n"
-                             f"🔄 Активаций: {max_activations}",
-                             parse_mode="HTML")
+        await message.answer(
+            f"✅ Промокод {promo_code} создан!\n"
+            f"💰 Бонус: {bonus_amount:.2f} USDT\n"
+            f"🔄 Активаций: {max_activations}\n"
+            f"📅 Действует до: {expiration_date.strftime('%d.%m.%Y %H:%M')}"
+        )
     except sqlite3.IntegrityError:
         await message.answer("⚠️ Промокод с таким названием уже существует! Попробуйте другое имя.")
 

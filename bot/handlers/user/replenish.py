@@ -195,6 +195,7 @@ async def process_custom_jpc(message: types.Message, state: FSMContext):
         kb = InlineKeyboardBuilder()
         kb.add(InlineKeyboardButton(text="Оплатить через звезды", callback_data="confirm_payment"))
         kb.add(InlineKeyboardButton(text="Оплатить через крипто бот", callback_data="confirm_payment_crypto_bot"))
+        kb.add(InlineKeyboardButton(text="Оплатить через Unlimint", callback_data="confirm_payment_unlimint"))
 
         replenish_image = get_menu_image("replenish")
 
@@ -219,7 +220,7 @@ async def process_custom_jpc(message: types.Message, state: FSMContext):
 @router.callback_query(lambda c: c.data.startswith('jpc_'))
 async def handle_jpc_choice(callback: CallbackQuery, state: FSMContext):
     """
-    Обработка выбора фиксированной суммы (2, 5, 10 и тестовая 0.1)
+    Обработка выбора фиксированной суммы (например, 2, 5, 10 или тестовая 0.1 JPC)
     """
     try:
         jpc_amount = float(callback.data.split('_')[1])
@@ -237,6 +238,7 @@ async def handle_jpc_choice(callback: CallbackQuery, state: FSMContext):
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Оплатить звездами (Telegram Pay)", callback_data="confirm_payment_stars"))
     kb.row(InlineKeyboardButton(text="Оплатить через Crypto Bot", callback_data="confirm_payment_crypto_bot"))
+    kb.row(InlineKeyboardButton(text="Оплатить через Unlimint", callback_data="confirm_payment_unlimint"))
 
     text = (
         f"💰 Вы выбрали пополнение на {jpc_amount} JPC (это {jpc_amount}$).\n"
@@ -259,6 +261,28 @@ async def handle_jpc_choice(callback: CallbackQuery, state: FSMContext):
             await callback.message.edit_text(text, reply_markup=kb.as_markup(), parse_mode="HTML")
     else:
         await callback.message.edit_text(text, reply_markup=kb.as_markup(), parse_mode="HTML")
+
+
+@router.callback_query(lambda c: c.data == "confirm_payment_unlimint")
+async def process_payment_unlimint(callback: CallbackQuery, state: FSMContext):
+    """
+    Обработка оплаты через Unlimint.
+    Используется тестовый токен: 5322214758:TEST:13be2003-7c03-4cae-bfc3-749887b2c6ed
+    """
+    data = await state.get_data()
+    jpc_amount = data.get("jpc_amount")
+    if not jpc_amount:
+        await callback.answer("Ошибка: сумма не указана.", show_alert=True)
+        return
+
+    unlimint_token = "5322214758:TEST:13be2003-7c03-4cae-bfc3-749887b2c6ed"
+
+    payment_url = f"https://test.unlimint.com/api/pay?token={unlimint_token}&amount={jpc_amount}"
+
+    await callback.message.edit_text(
+        f"Для оплаты через Unlimint, пожалуйста, перейдите по ссылке ниже:\n{payment_url}",
+        disable_web_page_preview=True
+    )
 
 
 @router.callback_query(lambda c: c.data == "confirm_payment_crypto_bot")
@@ -345,7 +369,6 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
     await pre_checkout_query.answer(ok=True)
 
 
-@router.callback_query(lambda c: c.data == '123')
 @router.message(F.successful_payment)
 async def process_successful_payment(message: types.Message, state: FSMContext):
     """

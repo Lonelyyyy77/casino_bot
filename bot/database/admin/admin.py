@@ -1,4 +1,5 @@
 import sqlite3
+import math
 
 from bot.database import DB_NAME
 
@@ -69,3 +70,30 @@ def set_menu_image(section: str, image_url: str):
 
     conn.commit()
     conn.close()
+
+
+def get_mailings_page(page: int):
+    """
+    Возвращает (mailings, total_pages) для указанной страницы.
+    mailings — список записей из таблицы mailings,
+    total_pages — общее количество страниц.
+    """
+    PAGE_SIZE = 3
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM mailings")
+    total_count = cursor.fetchone()[0]
+    total_pages = math.ceil(total_count / PAGE_SIZE) if total_count > 0 else 1
+
+    offset = page * PAGE_SIZE
+    cursor.execute("""
+        SELECT id, text, media_type, reward_amount, reward_uses, timestamp 
+        FROM mailings 
+        ORDER BY timestamp DESC 
+        LIMIT ? OFFSET ?
+    """, (PAGE_SIZE, offset))
+    mailings = cursor.fetchall()
+    conn.close()
+    return mailings, total_pages

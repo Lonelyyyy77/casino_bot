@@ -27,14 +27,15 @@ async def admin_panel(callback: types.CallbackQuery):
 
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text="👥 Посмотреть всех пользователей", callback_data="view_users"))
-    kb.row(InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="mailing"))
+    kb.row(InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="mailing"),
+           InlineKeyboardButton(text="⚙️ Настройки рассылки", callback_data='mailing_settings'))
     kb.row(InlineKeyboardButton(text="💰 Настроить реферальный процент", callback_data="adjust_referral_percent"))
     kb.row(InlineKeyboardButton(text='⚙️ Установить процент выигрыша', callback_data='set_global_percentage'))
     kb.row(InlineKeyboardButton(text='🖼 Установить картинку для меню', callback_data='admin_set_image'))
-    kb.row(InlineKeyboardButton(text="🎟 Создать промокод", callback_data="create_promo"))
+    kb.row(InlineKeyboardButton(text="🎟 Создать промокод", callback_data="create_promo"),
+           InlineKeyboardButton(text="⚙️ Настройка промокодов", callback_data='promo_settings'))
     kb.row(InlineKeyboardButton(text="🔙 Назад", callback_data='home'))
 
-    # Получаем изображение из базы
     admin_panel_image = get_menu_image("panel")
 
     if admin_panel_image:

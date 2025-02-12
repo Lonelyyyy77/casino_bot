@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = 'bot1.db'
+DB_NAME = 'bot12.db'
 
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
@@ -103,6 +103,7 @@ def initialize_database():
                 code TEXT UNIQUE NOT NULL,
                 bonus_amount REAL NOT NULL,
                 max_activations INTEGER NOT NULL,
+                expiration_date TEXT DEFAULT CURRENT_TIMESTAMP,
                 used_activations INTEGER DEFAULT 0
             )
         """)
@@ -115,6 +116,29 @@ def initialize_database():
                 UNIQUE(telegram_id, promo_code)
             )
         """)
+
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS mailings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                text TEXT,
+                media_id TEXT,
+                media_type TEXT,
+                reward_amount INTEGER,
+                reward_uses INTEGER,
+                reward_button_id INTEGER,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS reward_buttons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                amount INTEGER,
+                remaining_uses INTEGER,
+                mailing_id INTEGER,
+                FOREIGN KEY(mailing_id) REFERENCES mailings(id)
+            )
+        ''')
 
     conn.commit()
     conn.close()
