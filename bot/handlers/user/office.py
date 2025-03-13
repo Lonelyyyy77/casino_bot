@@ -18,6 +18,7 @@ async def get_office(callback: CallbackQuery):
     kb.add(InlineKeyboardButton(text="📤 Вывести баланс", callback_data='checkout_balance'))
     kb.row(InlineKeyboardButton(text="🧶 Передача баланса", callback_data="transfer_balance"))
     kb.row(InlineKeyboardButton(text="🎟 Активировать промокод", callback_data='activate_promo'))
+    kb.row(InlineKeyboardButton(text="📌 Задания", callback_data='missions'))
     kb.row(InlineKeyboardButton(text="🔙 Назад", callback_data='home'))
 
     # Получаем изображение для личного кабинета из БД

@@ -1,5 +1,6 @@
 from aiogram import Router, types
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto, InputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -10,7 +11,9 @@ router = Router()
 
 
 @router.callback_query(lambda c: c.data == "admin_panel")
-async def admin_panel(callback: types.CallbackQuery):
+async def admin_panel(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+
     if not is_admin(callback.from_user.id):
         await callback.answer("У вас нет доступа к этой функции!", show_alert=True)
         return
@@ -40,21 +43,17 @@ async def admin_panel(callback: types.CallbackQuery):
 
     if admin_panel_image:
         try:
-            if isinstance(admin_panel_image, str):  # Если это URL или файл
-                photo = admin_panel_image
-            else:
-                photo = InputFile(admin_panel_image)
+            photo = admin_panel_image if isinstance(admin_panel_image, str) else InputFile(admin_panel_image)
 
             if callback.message.photo:
                 media = InputMediaPhoto(media=photo, caption=stats_message, parse_mode="HTML")
                 await callback.message.edit_media(media=media, reply_markup=kb.as_markup())
             else:
-                await callback.message.delete()
-                await callback.message.answer_photo(photo=photo, caption=stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+                await callback.message.edit_text(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
         except TelegramBadRequest:
             await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
     else:
-        await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
-
-
-
+        try:
+            await callback.message.edit_text(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")
+        except TelegramBadRequest:
+            await callback.message.answer(stats_message, reply_markup=kb.as_markup(), parse_mode="HTML")

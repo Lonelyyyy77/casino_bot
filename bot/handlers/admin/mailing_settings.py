@@ -2,6 +2,7 @@ import math
 import sqlite3
 
 from aiogram import Router, types
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
@@ -103,6 +104,7 @@ def build_pagination_kb(current_page: int, total_pages: int) -> InlineKeyboardBu
                 text="Вперед ➡️", callback_data=f"mailing_settings:{current_page + 1}"
             )
         )
+    kb.row(InlineKeyboardButton(text="Назад", callback_data='admin_panel'))
     return kb
 
 

@@ -38,7 +38,6 @@ async def upload_image_start(callback: CallbackQuery, state: FSMContext):
     await state.set_state(UploadImageState.waiting_for_section)
 
 
-
 @router.callback_query(lambda c: c.data.startswith("set_image_"))
 async def upload_image_section(callback: types.CallbackQuery, state: FSMContext):
     section = callback.data.split("_")[-1]
@@ -50,6 +49,10 @@ async def upload_image_section(callback: types.CallbackQuery, state: FSMContext)
 
 @router.message(UploadImageState.waiting_for_image, F.photo)
 async def upload_image_save(message: types.Message, state: FSMContext):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+    kb.row(InlineKeyboardButton(text='Поставить еще одну картинку', callback_data='admin_set_image'))
+
     data = await state.get_data()
     section = data["section"]
 
@@ -57,5 +60,5 @@ async def upload_image_save(message: types.Message, state: FSMContext):
 
     set_menu_image(section, image_file_id)
 
-    await message.answer(f"✅ Изображение для раздела '{section}' успешно обновлено!")
+    await message.answer(f"✅ Изображение для раздела '{section}' успешно обновлено!", reply_markup=kb.as_markup())
     await state.clear()

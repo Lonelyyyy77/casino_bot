@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
 from bot.states.admin.states import PromoState
@@ -12,7 +14,10 @@ router = Router()
 
 @router.callback_query(lambda c: c.data == "create_promo")
 async def start_promo_creation(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text("Введите название промокода:")
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
+    await callback.message.edit_text("Введите название промокода:", reply_markup=kb.as_markup())
     await state.set_state(PromoState.waiting_for_code)
 
 
@@ -80,6 +85,9 @@ async def get_promo_expiration(message: types.Message, state: FSMContext):
     cursor = conn.cursor()
 
     try:
+        kb = InlineKeyboardBuilder()
+        kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
         cursor.execute(
             "INSERT INTO promo_codes (code, bonus_amount, max_activations, expiration_date) VALUES (?, ?, ?, ?)",
             (promo_code, bonus_amount, max_activations, expiration_date.strftime('%Y-%m-%d %H:%M:%S')),
@@ -89,7 +97,8 @@ async def get_promo_expiration(message: types.Message, state: FSMContext):
             f"✅ Промокод {promo_code} создан!\n"
             f"💰 Бонус: {bonus_amount:.2f} USDT\n"
             f"🔄 Активаций: {max_activations}\n"
-            f"📅 Действует до: {expiration_date.strftime('%d.%m.%Y %H:%M')}"
+            f"📅 Действует до: {expiration_date.strftime('%d.%m.%Y %H:%M')}",
+            reply_markup=kb.as_markup()
         )
     except sqlite3.IntegrityError:
         await message.answer("⚠️ Промокод с таким названием уже существует! Попробуйте другое имя.")

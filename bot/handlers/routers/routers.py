@@ -11,7 +11,13 @@ async def user_routers(dp) -> Router():
     from ..user.checkout_balance import router as user_checkout_balance_router
     from ..user.inline_send import router as user_inline_send_router
     from ..user.activate_promo import router as user_activate_promo_router
+    from ..user.missions_menu import router as user_missions_menu_router
+    from ..user.missions.mission_routers import missions_routers_func
 
+    missions_routers_local = await missions_routers_func()
+    dp.include_router(missions_routers_local)
+
+    dp.include_router(user_missions_menu_router)
     dp.include_router(user_games_router)
     dp.include_router(user_activate_promo_router)
     dp.include_router(user_replenish_router)

@@ -5,10 +5,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1aab047c-408e-4d3a-a986-9a4b865b0d19" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/bot/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/database/admin/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/database/user/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/admin/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/routers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/__user__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/missions/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/missions/mission1.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/missions/mission_routers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/handlers/user/missions_menu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/states/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/states/admin/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bot/states/user/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/database/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/adjust_referral_percent.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/adjust_referral_percent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/admin_panel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/create_promo.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/create_promo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/mailing.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/mailing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/mailing_settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/mailing_settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/percentage.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/percentage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/promo_settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/promo_settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/set_images.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/set_images.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/admin/view_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/admin/view_users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/routers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/routers/routers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/user/checkout_balance.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/checkout_balance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers/user/office.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers/user/office.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot/start_bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/start_bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot12.db" beforeDir="false" afterPath="$PROJECT_DIR$/bot12.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot112342.db" beforeDir="false" afterPath="$PROJECT_DIR$/bot112342.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,6 +97,9 @@
   &quot;associatedIndex&quot;: 2
 }</component>
   <component name="ProjectId" id="2rOD9YgioBi24oqNZxtoa7Lk9qI" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -80,7 +110,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;lonely77&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/G5/PycharmProjects/casino_bot/bot/start_bot.py&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editing.templates&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">

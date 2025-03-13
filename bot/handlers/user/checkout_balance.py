@@ -79,7 +79,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
     amount = amount_dict.get(data)
 
     if data == "withdraw_manual":
-        await callback.message.answer("Введите сумму для вывода (в USDT):")
+        await callback.message.edit_text("Введите сумму для вывода (в USDT):")
         await state.set_state(WithdrawStates.waiting_for_amount)
         return
     elif amount is None:
@@ -121,6 +121,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
         check = await crypto.create_check(asset='USDT', amount=amount)
     except Exception as e:
         await callback.message.answer("Ошибка при создании чека")
+        await state.clear()
 
         log_message = (f"🚨 *Ошибка вывода!*\n"
                        f"👤 Игрок: @{username}\n"
@@ -146,6 +147,7 @@ async def fixed_withdraw_handler(callback: CallbackQuery, state: FSMContext):
         f"🆔 Чек ID: {check.check_id}\n"
     )
     await callback.message.answer(response_text, reply_markup=kb.as_markup())
+    await state.clear()
 
     # Лог в канал
     log_message = (f"✅ *Вывод успешно создан!*\n"

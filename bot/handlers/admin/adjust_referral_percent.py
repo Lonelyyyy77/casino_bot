@@ -16,6 +16,7 @@ async def adjust_referral_percent(callback: types.CallbackQuery):
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text="Изменить для всех", callback_data="change_percent_all"))
     kb.row(InlineKeyboardButton(text="Изменить для пользователя", callback_data="change_percent_user"))
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
 
     await callback.message.edit_text(
         "Выберите действие:\n\n"
@@ -31,6 +32,9 @@ async def change_percent_all(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(ReferralSettingsState.change_percent_all)
 async def save_percent_all(message: types.Message, state: FSMContext):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
     try:
         new_percent = float(message.text)
         if new_percent < 0 or new_percent > 100:
@@ -42,7 +46,8 @@ async def save_percent_all(message: types.Message, state: FSMContext):
         conn.commit()
         conn.close()
 
-        await message.answer(f"Процент реферальных выплат для всех пользователей обновлён на {new_percent}%.")
+        await message.answer(f"Процент реферальных выплат для всех пользователей обновлён на {new_percent}%.",
+                             reply_markup=kb.as_markup())
         await state.clear()
     except ValueError:
         await message.answer("Введите корректное число от 0 до 100.")
@@ -59,6 +64,9 @@ async def change_percent_user(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(ReferralSettingsState.change_percent_user)
 async def save_percent_user(message: types.Message, state: FSMContext):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
     try:
         user_data = message.text.split(":")
         user_id = int(user_data[0].strip())
@@ -73,7 +81,8 @@ async def save_percent_user(message: types.Message, state: FSMContext):
         if cursor.rowcount == 0:
             await message.answer(f"Пользователь с ID {user_id} не найден.")
         else:
-            await message.answer(f"Процент реферальных выплат для пользователя {user_id} обновлён на {new_percent}%.")
+            await message.answer(f"Процент реферальных выплат для пользователя {user_id} обновлён на {new_percent}%.",
+                                 reply_markup=kb.as_markup())
         conn.commit()
         conn.close()
 

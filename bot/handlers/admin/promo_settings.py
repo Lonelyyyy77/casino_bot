@@ -2,6 +2,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from aiogram import Router
 import sqlite3
 
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from bot.database import DB_NAME
 
 router = Router()
@@ -9,6 +11,9 @@ router = Router()
 
 @router.callback_query(lambda c: c.data == "promo_settings")
 async def promo_settings(callback: CallbackQuery):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -23,7 +28,7 @@ async def promo_settings(callback: CallbackQuery):
     conn.close()
 
     if not promo_codes:
-        await callback.message.edit_text("⚠️ Нет активных промокодов.")
+        await callback.message.edit_text("⚠️ Нет активных промокодов.", reply_markup=kb.as_markup())
         return
 
     promo_text = "🎟 <b>Активные промокоды:</b>\n\n"
@@ -45,6 +50,7 @@ async def promo_settings(callback: CallbackQuery):
 
         buttons.append(InlineKeyboardButton(text=f"❌ Удалить {code}", callback_data=f"delete_promo:{code}"))
 
+    buttons.append(InlineKeyboardButton(text="🔙 Назад", callback_data="admin_panel"))
     keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
 
     await callback.message.edit_text(promo_text, reply_markup=keyboard, parse_mode="HTML")

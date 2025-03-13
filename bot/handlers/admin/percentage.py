@@ -2,7 +2,8 @@ import sqlite3
 
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.database import DB_NAME
 from bot.database.admin.admin import is_admin
@@ -24,6 +25,9 @@ def get_global_percentage():
 
 @router.callback_query(lambda c: c.data == 'set_global_percentage')
 async def initiate_set_percentage(callback: CallbackQuery, state: FSMContext):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text='Назад', callback_data='admin_panel'))
+
     if not is_admin(callback.from_user.id):
         await callback.answer("У вас нет прав для выполнения этой команды.")
         return
@@ -37,6 +41,9 @@ async def initiate_set_percentage(callback: CallbackQuery, state: FSMContext):
 async def process_new_percentage(message: types.Message, state: FSMContext):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text='Назад', callback_data='admin_panel'))
 
     if not is_admin(message.from_user.id):
         await message.reply("У вас нет прав для выполнения этой команды.")
@@ -60,18 +67,16 @@ async def process_new_percentage(message: types.Message, state: FSMContext):
 
         if result:
             cursor.execute('UPDATE game_settings SET percentage = ? WHERE id = 1', (percentage,))
-            await message.reply(f"Глобальный процент успешно обновлён на {percentage}%.")
+            await message.reply(f"Глобальный процент успешно обновлён на {percentage}%.", reply_markup=kb.as_markup())
         else:
             cursor.execute('INSERT INTO game_settings (id, percentage) VALUES (?, ?)', (1, percentage))
-            await message.reply(f"Глобальный процент успешно установлен на {percentage}%.")
+            await message.reply(f"Глобальный процент успешно установлен на {percentage}%.", reply_markup=kb.as_markup())
 
         conn.commit()
     except sqlite3.Error as e:
-        await message.reply(f"Произошла ошибка при работе с базой данных: {e}")
+        await message.reply(f"Произошла ошибка при работе с базой данных: {e}", reply_markup=kb.as_markup())
     finally:
         if conn:
             conn.close()
 
     await state.clear()
-
-

@@ -74,6 +74,7 @@ async def view_users(callback: types.CallbackQuery):
         nav_buttons.append(InlineKeyboardButton(text="➡️ Вперёд", callback_data=f"view_users:{page + 1}"))
     if nav_buttons:
         kb.row(*nav_buttons)
+    kb.row(InlineKeyboardButton(text="Назад", callback_data='admin_panel'))
 
     await callback.message.edit_text(
         f"Список пользователей (страница {page}/{total_pages}):\n\n{user_list}",

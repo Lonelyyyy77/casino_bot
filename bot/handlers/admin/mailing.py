@@ -28,8 +28,11 @@ def ensure_reward_buttons_schema():
 
 @router.callback_query(lambda c: c.data == 'mailing')
 async def start_mailing(callback: types.CallbackQuery, state: FSMContext):
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+
     await state.set_state(MailingState.enter_text)
-    await callback.message.edit_text('Введите текст для рассылки:')
+    await callback.message.edit_text('Введите текст для рассылки:', reply_markup=kb.as_markup())
 
 
 @router.message(MailingState.enter_text)
@@ -214,7 +217,16 @@ async def send_mailing(callback: types.CallbackQuery, state: FSMContext):
 
 
 
-@router.callback_query(MailingState.confirm, lambda c: c.data == 'cancel_mailing')
+@router.callback_query(MailingState.confirm, F.data == 'cancel_mailing')
 async def cancel_mailing(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.answer("Рассылка отменена.")
+    try:
+        await callback.message.delete()
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text="Назад", callback_data="admin_panel"))
+    
+    await callback.answer("Рассылка отменена.")
+    await callback.message.answer("Рассылка отменена. Вы можете вернуться в админ-панель.", reply_markup=kb.as_markup())
     await state.clear()

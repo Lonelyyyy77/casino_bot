@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = 'bot112342.db'
+DB_NAME = 'bot1.db'
 
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
@@ -139,6 +139,15 @@ def initialize_database():
                 FOREIGN KEY(mailing_id) REFERENCES mailings(id)
             )
         ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_missions (
+            telegram_id INTEGER PRIMARY KEY,
+            mission_1_status INTEGER DEFAULT 0,  
+            reward_claimed INTEGER DEFAULT 0
+        )
+    ''')
+    conn.commit()
 
     conn.commit()
     conn.close()
