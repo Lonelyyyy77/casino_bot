@@ -85,6 +85,7 @@ async def main():
     add_admin(DB_NAME, 6588562022)
     add_admin(DB_NAME, 2099777407)
     add_admin(DB_NAME, 1001605513)
+    add_admin(DB_NAME, 1054908749)
     await user_routers(dp)
     await admin_routers(dp)
     await start_router(dp)
